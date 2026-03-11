@@ -1,0 +1,65 @@
+name: MyPetAddon
+version: 1.0.0-SNAPSHOT
+main: com.mypetaddon.MyPetAddonPlugin
+api-version: "1.21"
+description: "MyPet extension with rarity, personality, bond, evolution, skills, equipment, and encyclopedia"
+depend:
+  - MyPet
+softdepend:
+  - LevelledMobs
+  - MythicMobs
+commands:
+  petname:
+    description: "Name a pending tamed monster"
+    usage: "/petname <name>"
+  petstatus:
+    description: "Show pet status"
+    usage: "/petstatus"
+  petadmin:
+    description: "Admin commands"
+    usage: "/petadmin <subcommand>"
+  petevolve:
+    description: "Evolve your pet"
+    usage: "/petevolve"
+  petskill:
+    description: "Use a pet skill"
+    usage: "/petskill [skill]"
+  petequip:
+    description: "Open pet equipment GUI"
+    usage: "/petequip"
+  petdex:
+    description: "Open pet encyclopedia"
+    usage: "/petdex"
+permissions:
+  mypetaddon.*:
+    description: "All MyPetAddon permissions"
+    default: op
+    children:
+      mypetaddon.tame: true
+      mypetaddon.status: true
+      mypetaddon.skill: true
+      mypetaddon.equip: true
+      mypetaddon.encyclopedia: true
+      mypetaddon.evolve: true
+      mypetaddon.admin: true
+  mypetaddon.tame:
+    description: "Allows taming pets"
+    default: true
+  mypetaddon.status:
+    description: "Allows viewing pet status"
+    default: true
+  mypetaddon.skill:
+    description: "Allows using pet skills"
+    default: true
+  mypetaddon.equip:
+    description: "Allows equipping pets"
+    default: true
+  mypetaddon.encyclopedia:
+    description: "Allows viewing pet encyclopedia"
+    default: true
+  mypetaddon.evolve:
+    description: "Allows evolving pets"
+    default: true
+  mypetaddon.admin:
+    description: "Admin commands"
+    default: op

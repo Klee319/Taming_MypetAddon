@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -64,8 +63,6 @@ public final class EvolutionGUI implements Listener {
         this.plugin = plugin;
         this.evolutionManager = evolutionManager;
         this.petDataCache = petDataCache;
-
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     // ─── Open GUI ───────────────────────────────────────────────
@@ -227,9 +224,10 @@ public final class EvolutionGUI implements Listener {
 
             if (!check.statBonus().isEmpty()) {
                 lore.add("§6§lステータスボーナス:");
-                for (Map.Entry<String, Integer> bonus : check.statBonus().entrySet()) {
+                for (Map.Entry<String, Double> bonus : check.statBonus().entrySet()) {
+                    double percent = (bonus.getValue() - 1.0) * 100.0;
                     lore.add("§7  " + bonus.getKey() + ": §a+"
-                            + bonus.getValue());
+                            + String.format("%.0f%%", percent));
                 }
             } else {
                 lore.add("§7ステータスボーナスなし");

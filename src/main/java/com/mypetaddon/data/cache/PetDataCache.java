@@ -86,6 +86,21 @@ public final class PetDataCache {
     }
 
     /**
+     * Preloads all pet data for a player into the cache asynchronously.
+     * Should be called on PlayerJoinEvent to avoid sync DB hits on cache misses.
+     *
+     * @param ownerUuid the player's UUID
+     */
+    public void preloadForPlayer(@NotNull UUID ownerUuid) {
+        List<PetData> pets = repository.findByOwner(ownerUuid);
+        for (PetData data : pets) {
+            dataByMypetUuid.putIfAbsent(data.mypetUuid(), data);
+            repository.findStatsByAddonPetId(data.addonPetId())
+                    .ifPresent(stats -> statsByAddonPetId.putIfAbsent(data.addonPetId(), stats));
+        }
+    }
+
+    /**
      * Puts pet data and stats into the cache and marks them dirty for DB persistence.
      */
     public void put(@NotNull PetData data, @NotNull PetStats stats) {
@@ -176,6 +191,18 @@ public final class PetDataCache {
 
         dirtyAddonPetIds.clear();
         logger.info("[Cache] Flushed " + count + " pet records to database.");
+    }
+
+    /**
+     * Gets pet data by addon pet ID by scanning the cache.
+     * Returns null if not found in the cache.
+     *
+     * @param addonPetId the addon-internal pet UUID
+     * @return the PetData, or null if not found
+     */
+    @Nullable
+    public PetData getByAddonPetId(@NotNull UUID addonPetId) {
+        return findDataByAddonPetId(addonPetId);
     }
 
     // --- Internal ---

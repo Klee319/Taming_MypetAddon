@@ -40,9 +40,9 @@ public final class ConfigValidator {
 
     private void validateRarityChances(@NotNull FileConfiguration config,
                                        @NotNull List<String> errors) {
-        ConfigurationSection ranges = config.getConfigurationSection("rarity-chances.level-ranges");
+        ConfigurationSection ranges = config.getConfigurationSection("rarity.level-ranges");
         if (ranges == null) {
-            errors.add("Missing required section: rarity-chances.level-ranges");
+            errors.add("Missing required section: rarity.level-ranges");
             return;
         }
 
@@ -143,7 +143,7 @@ public final class ConfigValidator {
 
             while (current != null && !visited.contains(current)) {
                 visited.add(current);
-                current = evolutions.getString(current + ".evolves-to");
+                current = evolutions.getString(current + ".target");
             }
 
             if (current != null && visited.contains(current)) {
@@ -157,16 +157,19 @@ public final class ConfigValidator {
 
     private void validateMobTypes(@NotNull FileConfiguration config,
                                   @NotNull List<String> errors) {
+        // pet-base-values uses tier structure (tier-1, tier-2, etc.) with types lists
+        // Validate the mob types inside each tier
         ConfigurationSection baseValues = config.getConfigurationSection("pet-base-values");
-        if (baseValues == null) {
-            return;
-        }
-
-        for (String mobTypeName : baseValues.getKeys(false)) {
-            try {
-                EntityType.valueOf(mobTypeName.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException e) {
-                errors.add("Unknown EntityType in pet-base-values: " + mobTypeName);
+        if (baseValues != null) {
+            for (String tierKey : baseValues.getKeys(false)) {
+                List<String> types = config.getStringList("pet-base-values." + tierKey + ".types");
+                for (String mobTypeName : types) {
+                    try {
+                        EntityType.valueOf(mobTypeName.toUpperCase(Locale.ROOT));
+                    } catch (IllegalArgumentException e) {
+                        errors.add("Unknown EntityType '" + mobTypeName + "' in pet-base-values." + tierKey + ".types");
+                    }
+                }
             }
         }
 
@@ -175,7 +178,7 @@ public final class ConfigValidator {
         if (evolutions != null) {
             for (String fromType : evolutions.getKeys(false)) {
                 validateEntityTypeName(fromType, "evolutions (from)", errors);
-                String toType = evolutions.getString(fromType + ".evolves-to");
+                String toType = evolutions.getString(fromType + ".target");
                 if (toType != null) {
                     validateEntityTypeName(toType, "evolutions (to)", errors);
                 }
@@ -196,13 +199,13 @@ public final class ConfigValidator {
 
     private void validateStatMultipliers(@NotNull FileConfiguration config,
                                          @NotNull List<String> errors) {
-        ConfigurationSection tiers = config.getConfigurationSection("rarity-tiers");
+        ConfigurationSection tiers = config.getConfigurationSection("rarity.tiers");
         if (tiers == null) {
             return;
         }
 
         for (String tierName : tiers.getKeys(false)) {
-            double multiplier = tiers.getDouble(tierName + ".multiplier", 1.0);
+            double multiplier = tiers.getDouble(tierName + ".stat-multiplier", 1.0);
             if (multiplier <= 0) {
                 errors.add("Stat multiplier must be positive for rarity tier: " + tierName
                         + " (got " + multiplier + ")");
@@ -215,7 +218,7 @@ public final class ConfigValidator {
     private void validateRequiredKeys(@NotNull FileConfiguration config,
                                       @NotNull List<String> errors) {
         List<String> requiredPaths = List.of(
-                "rarity-chances.level-ranges",
+                "rarity.level-ranges",
                 "bond.levels",
                 "bond.gain",
                 "bond.loss"

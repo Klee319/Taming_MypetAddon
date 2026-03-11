@@ -256,7 +256,11 @@ public final class PetDataRepository {
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            for (String statName : stats.baseValues().keySet()) {
+            // Collect all stat names from both base and upgraded maps
+            java.util.Set<String> allStatNames = new java.util.LinkedHashSet<>(stats.baseValues().keySet());
+            allStatNames.addAll(stats.upgradedValues().keySet());
+
+            for (String statName : allStatNames) {
                 ps.setString(1, stats.addonPetId().toString());
                 ps.setString(2, statName);
                 ps.setDouble(3, stats.baseValues().getOrDefault(statName, 0.0));

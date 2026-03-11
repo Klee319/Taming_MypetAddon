@@ -8,9 +8,9 @@ import com.mypetaddon.data.PetData;
 import com.mypetaddon.data.PetStats;
 import com.mypetaddon.data.cache.PetDataCache;
 import com.mypetaddon.rarity.Rarity;
+import com.mypetaddon.stats.ModifierPipeline;
 import com.mypetaddon.stats.StatsManager;
 import com.mypetaddon.evolution.EvolutionManager;
-import com.mypetaddon.skill.PetSkillManager;
 import com.mypetaddon.taming.TamingManager;
 import de.Keyle.MyPet.MyPetApi;
 import de.Keyle.MyPet.api.entity.MyPet;
@@ -79,7 +79,6 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         registerCommand("petstatus");
         registerCommand("petadmin");
         registerCommand("petevolve");
-        registerCommand("petskill");
         registerCommand("petequip");
         registerCommand("petdex");
     }
@@ -106,7 +105,6 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
             case "petstatus" -> handlePetStatus(sender);
             case "petadmin" -> handlePetAdmin(sender, args);
             case "petevolve" -> handlePetEvolve(sender);
-            case "petskill" -> handlePetSkill(sender, args);
             case "petequip" -> handlePetEquip(sender);
             case "petdex" -> handlePetDex(sender);
             default -> false;
@@ -198,30 +196,31 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         player.sendMessage("  " + bondBar + " §7" + bondExp + " EXP");
         player.sendMessage("");
 
-        // Stat breakdown
+        // Stat breakdown (use ModifierPipeline for accurate final values)
         if (petStats != null) {
+            ModifierPipeline pipeline = plugin.getStatsManager().getModifierPipeline();
             player.sendMessage("  §7§nStat Breakdown:");
-            for (String statName : petStats.baseValues().keySet()) {
+            java.util.Set<String> allStatNames = new java.util.LinkedHashSet<>(petStats.baseValues().keySet());
+            allStatNames.addAll(petStats.upgradedValues().keySet());
+            for (String statName : allStatNames) {
                 double base = petStats.baseValues().getOrDefault(statName, 0.0);
+                double upgraded = petStats.upgradedValues().getOrDefault(statName, 0.0);
                 double rarityMult = rarity.getStatMultiplier();
                 double personalityMod = petData.personality().getModifier(statName, 1.0);
-                double bondBonus = 1.0 + BondLevel.getStatBonus(bondLevel, statName);
-                double finalValue = petStats.getEffective(statName);
+                double bondBonus = BondLevel.getStatBonus(bondLevel, statName);
+                double finalValue = pipeline.calculate(statName, petData, petStats);
 
                 player.sendMessage(String.format(
-                        "  §7%s: §f%.1f §8(base) §7x§e%.2f §8(rarity) §7x§b%.2f §8(personality) §7x§a%.2f §8(bond) §7= §f%.1f",
-                        capitalize(statName), base, rarityMult, personalityMod, bondBonus, finalValue
+                        "  §7%s: §f%.1f §8(base+%.1f) §7x§e%.2f §8(rarity) §7x§b%.2f §8(personality) §7+§a%.2f §8(bond) §7= §f%.1f",
+                        capitalize(statName), base, upgraded, rarityMult, personalityMod, bondBonus, finalValue
                 ));
             }
         } else {
             player.sendMessage("  §7Stats: §8(not available)");
         }
 
-        // Unlocked skills
-        int skillSlots = rarity.getSkillSlots();
         player.sendMessage("");
-        player.sendMessage("  §7Skill Slots: §f" + skillSlots
-                + " §8| §7Awakening: " + (rarity.isAwakeningEligible() ? "§aEligible" : "§8Ineligible"));
+        player.sendMessage("  §7Awakening: " + (rarity.isAwakeningEligible() ? "§aEligible" : "§8Ineligible"));
         player.sendMessage("§8§m─────────────────────────────────");
     }
 
@@ -282,55 +281,6 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
 
         // Open confirmation GUI
         plugin.getEvolutionGUI().openConfirmation(player, myPet, check);
-        return true;
-    }
-
-    // ─── /petskill <skill> ────────────────────────────────────────
-
-    private boolean handlePetSkill(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(PREFIX + "§cThis command can only be used by players.");
-            return true;
-        }
-        if (!player.hasPermission("mypetaddon.skill")) {
-            player.sendMessage(PREFIX + "§cYou do not have permission to use this command.");
-            return true;
-        }
-
-        if (args.length == 0) {
-            // Show available skills
-            MyPet myPet = getActiveMyPet(player);
-            if (myPet == null) {
-                player.sendMessage(PREFIX + "§cYou do not have an active pet.");
-                return true;
-            }
-            PetData petData = petDataCache.get(myPet.getUUID());
-            if (petData == null) {
-                player.sendMessage(PREFIX + "§cNo addon data found for this pet.");
-                return true;
-            }
-
-            PetSkillManager skillManager = plugin.getPetSkillManager();
-            var skills = skillManager.getAvailableSkills(petData);
-            if (skills.isEmpty()) {
-                player.sendMessage(PREFIX + "§7Your pet has no available skills.");
-                return true;
-            }
-            player.sendMessage(PREFIX + "§eAvailable skills:");
-            for (var skill : skills) {
-                String status = skill.isAvailable() ? "§a" : "§c(Locked) ";
-                player.sendMessage("  " + status + skill.displayName()
-                        + " §8- §7" + skill.description()
-                        + " §8[CD: " + skill.cooldown() + "s]");
-            }
-            return true;
-        }
-
-        String skillId = args[0].toLowerCase(Locale.ROOT);
-        PetSkillManager skillManager = plugin.getPetSkillManager();
-        if (!skillManager.executeSkill(player, skillId)) {
-            player.sendMessage(PREFIX + "§cFailed to use skill. Check /petskill for available skills.");
-        }
         return true;
     }
 
@@ -560,7 +510,6 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
             case "petstatus" -> Collections.emptyList();
             case "petadmin" -> completeAdmin(sender, args);
             case "petevolve" -> Collections.emptyList();
-            case "petskill" -> completeSkill(sender, args);
             case "petequip" -> Collections.emptyList();
             case "petdex" -> Collections.emptyList();
             default -> null;
@@ -594,25 +543,6 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
             return List.of("100", "350", "750", "1500");
         }
 
-        return Collections.emptyList();
-    }
-
-    @NotNull
-    private List<String> completeSkill(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (args.length == 1 && sender instanceof Player player) {
-            MyPet myPet = getActiveMyPet(player);
-            if (myPet != null) {
-                PetData petData = petDataCache.get(myPet.getUUID());
-                if (petData != null) {
-                    PetSkillManager skillManager = plugin.getPetSkillManager();
-                    return skillManager.getAvailableSkills(petData).stream()
-                            .filter(PetSkillManager.SkillInfo::isAvailable)
-                            .map(s -> s.skillId().toLowerCase(Locale.ROOT))
-                            .filter(s -> s.startsWith(args[0].toLowerCase(Locale.ROOT)))
-                            .collect(Collectors.toList());
-                }
-            }
-        }
         return Collections.emptyList();
     }
 

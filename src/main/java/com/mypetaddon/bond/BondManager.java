@@ -151,23 +151,7 @@ public final class BondManager {
      * Finds PetData by addon pet ID by checking the cache.
      * Returns null if not found.
      */
-    @SuppressWarnings("unchecked")
     private PetData findPetDataByAddonId(@NotNull UUID addonPetId) {
-        // Access the cache's internal map via reflection as a fallback
-        // Ideally the cache would expose a getByAddonPetId method
-        try {
-            var field = PetDataCache.class.getDeclaredField("dataByMypetUuid");
-            field.setAccessible(true);
-            Map<UUID, PetData> dataMap = (Map<UUID, PetData>) field.get(petDataCache);
-
-            for (PetData data : dataMap.values()) {
-                if (data.addonPetId().equals(addonPetId)) {
-                    return data;
-                }
-            }
-        } catch (Exception e) {
-            logger.warning("[Bond] Failed to look up PetData for addon pet: " + addonPetId);
-        }
-        return null;
+        return petDataCache.getByAddonPetId(addonPetId);
     }
 }

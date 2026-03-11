@@ -21,9 +21,6 @@ commands:
   petevolve:
     description: "Evolve your pet"
     usage: "/petevolve"
-  petskill:
-    description: "Use a pet skill"
-    usage: "/petskill [skill]"
   petequip:
     description: "Open pet equipment GUI"
     usage: "/petequip"
@@ -37,7 +34,6 @@ permissions:
     children:
       mypetaddon.tame: true
       mypetaddon.status: true
-      mypetaddon.skill: true
       mypetaddon.equip: true
       mypetaddon.encyclopedia: true
       mypetaddon.evolve: true
@@ -47,9 +43,6 @@ permissions:
     default: true
   mypetaddon.status:
     description: "Allows viewing pet status"
-    default: true
-  mypetaddon.skill:
-    description: "Allows using pet skills"
     default: true
   mypetaddon.equip:
     description: "Allows equipping pets"

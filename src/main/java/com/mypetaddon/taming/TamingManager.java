@@ -2,6 +2,7 @@ package com.mypetaddon.taming;
 
 import com.mypetaddon.MyPetAddonPlugin;
 import com.mypetaddon.config.ConfigManager;
+import com.mypetaddon.config.ConfigManager.TamingItemEntry;
 import com.mypetaddon.data.EncyclopediaRepository;
 import com.mypetaddon.data.PetData;
 import com.mypetaddon.data.PetStats;
@@ -11,7 +12,9 @@ import com.mypetaddon.personality.Personality;
 import com.mypetaddon.personality.PersonalityManager;
 import com.mypetaddon.rarity.Rarity;
 import com.mypetaddon.rarity.RarityManager;
+import com.mypetaddon.skilltree.SkilltreeAssigner;
 import com.mypetaddon.stats.StatsManager;
+import com.mypetaddon.util.ItemMatcher;
 import de.Keyle.MyPet.MyPetApi;
 import de.Keyle.MyPet.api.WorldGroup;
 import de.Keyle.MyPet.api.entity.MyPetType;
@@ -33,9 +36,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,6 +59,7 @@ public final class TamingManager {
     private final EncyclopediaRepository encyclopediaRepository;
     private final MythicMobsIntegration mythicMobsIntegration;
     private final StatsManager statsManager;
+    private final SkilltreeAssigner skilltreeAssigner;
     private final Logger logger;
 
     /** Player UUID -> pending monster tame target. */
@@ -85,7 +91,8 @@ public final class TamingManager {
                          @NotNull PetDataCache petDataCache,
                          @NotNull EncyclopediaRepository encyclopediaRepository,
                          @NotNull MythicMobsIntegration mythicMobsIntegration,
-                         @NotNull StatsManager statsManager) {
+                         @NotNull StatsManager statsManager,
+                         @NotNull SkilltreeAssigner skilltreeAssigner) {
         this.plugin = plugin;
         this.configManager = configManager;
         this.rarityManager = rarityManager;
@@ -94,7 +101,13 @@ public final class TamingManager {
         this.encyclopediaRepository = encyclopediaRepository;
         this.mythicMobsIntegration = mythicMobsIntegration;
         this.statsManager = statsManager;
+        this.skilltreeAssigner = skilltreeAssigner;
         this.logger = plugin.getLogger();
+
+        // Schedule periodic cleanup of stale pending tames (every 30 seconds)
+        long cleanupIntervalTicks = 30L * 20L; // 30 seconds
+        Bukkit.getScheduler().runTaskTimer(plugin, this::cleanupStalePendingTames,
+                cleanupIntervalTicks, cleanupIntervalTicks);
     }
 
     /**
@@ -109,13 +122,6 @@ public final class TamingManager {
     public boolean handleAnimalInteract(@NotNull Player player,
                                         @NotNull LivingEntity entity,
                                         @NotNull ItemStack mainHand) {
-        // Check taming item
-        String itemName = configManager.getTamingAnimalItem();
-        Material required = Material.matchMaterial(itemName);
-        if (required == null || mainHand.getType() != required) {
-            return false;
-        }
-
         // Check entity is an animal
         if (!isAnimal(entity.getType())) {
             return false;
@@ -126,8 +132,25 @@ public final class TamingManager {
             return false;
         }
 
-        // Consume one item
-        mainHand.setAmount(mainHand.getAmount() - 1);
+        // Find matching taming item from config list
+        List<TamingItemEntry> items = configManager.getTamingAnimalItems();
+        TamingItemEntry matched = findMatchingItem(mainHand, items);
+        if (matched == null) {
+            return false;
+        }
+
+        // Consume item if configured
+        if (matched.consume()) {
+            mainHand.setAmount(mainHand.getAmount() - 1);
+        }
+
+        // Check success rate
+        if (matched.successRate() < 1.0
+                && ThreadLocalRandom.current().nextDouble() >= matched.successRate()) {
+            int pct = (int) (matched.successRate() * 100);
+            player.sendMessage("§cテイミングに失敗しました... (成功率: §f" + pct + "%§c)");
+            return true;
+        }
 
         // Visual/audio feedback
         entity.getWorld().spawnParticle(Particle.HEART, entity.getLocation(),
@@ -147,12 +170,15 @@ public final class TamingManager {
             return true;
         }
 
+        // Assign skill tree based on config rules
+        String mobType = entity.getType().name();
+        skilltreeAssigner.assignOnTame(inactiveMyPet, rarity, mobType);
+
         // Remove the original entity
         entity.remove();
 
         // Create addon data
         UUID addonPetId = UUID.randomUUID();
-        String mobType = entity.getType().name();
 
         PetData petData = new PetData(
                 addonPetId, inactiveMyPet.getUUID(), player.getUniqueId(),
@@ -185,13 +211,6 @@ public final class TamingManager {
     public boolean handleMonsterInteract(@NotNull Player player,
                                          @NotNull LivingEntity entity,
                                          @NotNull ItemStack mainHand) {
-        // Check taming item
-        String itemName = configManager.getTamingMonsterItem();
-        Material required = Material.matchMaterial(itemName);
-        if (required == null || mainHand.getType() != required) {
-            return false;
-        }
-
         // Check entity is a monster/hostile
         if (!isMonster(entity.getType())) {
             return false;
@@ -207,8 +226,25 @@ public final class TamingManager {
             return false;
         }
 
-        // Consume one item
-        mainHand.setAmount(mainHand.getAmount() - 1);
+        // Find matching taming item from config list
+        List<TamingItemEntry> items = configManager.getTamingMonsterItems();
+        TamingItemEntry matched = findMatchingItem(mainHand, items);
+        if (matched == null) {
+            return false;
+        }
+
+        // Consume item if configured
+        if (matched.consume()) {
+            mainHand.setAmount(mainHand.getAmount() - 1);
+        }
+
+        // Check success rate (for monster, rate check happens at tame start)
+        if (matched.successRate() < 1.0
+                && ThreadLocalRandom.current().nextDouble() >= matched.successRate()) {
+            int pct = (int) (matched.successRate() * 100);
+            player.sendMessage("§cテイミングに失敗しました... (成功率: §f" + pct + "%§c)");
+            return true;
+        }
 
         // Register pending tame
         pendingMonsterTames.put(player.getUniqueId(),
@@ -321,9 +357,12 @@ public final class TamingManager {
             return false;
         }
 
+        // Assign skill tree based on config rules
+        String mobType = pending.originalEntity().getType().name();
+        skilltreeAssigner.assignOnTame(inactiveMyPet, pending.rarity(), mobType);
+
         // Create addon data
         UUID addonPetId = UUID.randomUUID();
-        String mobType = pending.originalEntity().getType().name();
 
         PetData petData = new PetData(
                 addonPetId, inactiveMyPet.getUUID(), player.getUniqueId(),
@@ -439,6 +478,40 @@ public final class TamingManager {
     }
 
     // ─── Internal ────────────────────────────────────────────────
+
+    /**
+     * Finds the first matching taming item entry for the given hand item.
+     *
+     * @param handItem the item the player is holding
+     * @param entries  the list of taming item entries from config
+     * @return the matching entry, or null if none match
+     */
+    @Nullable
+    private TamingItemEntry findMatchingItem(@NotNull ItemStack handItem,
+                                             @NotNull List<TamingItemEntry> entries) {
+        for (TamingItemEntry entry : entries) {
+            if (ItemMatcher.matches(handItem, entry.itemDescriptor(), logger)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Removes stale pending tame entries older than the configured timeout.
+     * Also removes entries whose target entity is dead or removed.
+     */
+    private void cleanupStalePendingTames() {
+        long now = System.currentTimeMillis();
+        long timeoutMs = configManager.getTamingTimeout();
+
+        pendingMonsterTames.entrySet().removeIf(entry -> {
+            PendingTame pending = entry.getValue();
+            boolean isStale = (now - pending.timestamp()) > timeoutMs;
+            boolean isDead = pending.entity().isDead() || !pending.entity().isValid();
+            return isStale || isDead;
+        });
+    }
 
     /**
      * Cleans up any pending tame entry that references the given entity,

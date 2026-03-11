@@ -22,9 +22,8 @@ import com.mypetaddon.equipment.EquipmentListener;
 import com.mypetaddon.equipment.EquipmentManager;
 import com.mypetaddon.evolution.EvolutionGUI;
 import com.mypetaddon.evolution.EvolutionManager;
-import com.mypetaddon.skill.CooldownTracker;
-import com.mypetaddon.skill.PetSkillListener;
-import com.mypetaddon.skill.PetSkillManager;
+import com.mypetaddon.skilltree.PetInteractListener;
+import com.mypetaddon.skilltree.SkilltreeAssigner;
 import com.mypetaddon.taming.TamingListener;
 import com.mypetaddon.taming.TamingManager;
 import org.bukkit.Bukkit;
@@ -52,8 +51,7 @@ public final class MyPetAddonPlugin extends JavaPlugin {
     private EvolutionGUI evolutionGUI;
     private EquipmentManager equipmentManager;
     private EquipmentGUI equipmentGUI;
-    private PetSkillManager petSkillManager;
-    private CooldownTracker cooldownTracker;
+    private SkilltreeAssigner skilltreeAssigner;
 
     @Override
     public void onEnable() {
@@ -97,9 +95,10 @@ public final class MyPetAddonPlugin extends JavaPlugin {
         modifierPipeline = new ModifierPipeline(configManager);
         bondManager = new BondManager(this, configManager, petDataCache);
         statsManager = new StatsManager(this, configManager, petDataCache, modifierPipeline);
+        skilltreeAssigner = new SkilltreeAssigner(configManager, getLogger());
         tamingManager = new TamingManager(this, configManager, rarityManager,
                 personalityManager, petDataCache, encyclopediaRepository,
-                mythicMobsIntegration, statsManager);
+                mythicMobsIntegration, statsManager, skilltreeAssigner);
 
         // 7b. Phase 2 Managers
         encyclopediaManager = new EncyclopediaManager(this, configManager, encyclopediaRepository);
@@ -107,21 +106,22 @@ public final class MyPetAddonPlugin extends JavaPlugin {
         evolutionManager = new EvolutionManager(this, configManager, petDataCache, statsManager);
         evolutionGUI = new EvolutionGUI(this, evolutionManager, petDataCache);
         equipmentManager = new EquipmentManager(this, configManager, databaseManager);
+        modifierPipeline.setEquipmentManager(equipmentManager);
         equipmentGUI = new EquipmentGUI(this, equipmentManager, petDataCache);
-        cooldownTracker = new CooldownTracker();
-        petSkillManager = new PetSkillManager(this, configManager, petDataCache, cooldownTracker);
-
         // 8. Event Listeners
+        getServer().getPluginManager().registerEvents(statsManager, this);
+        getServer().getPluginManager().registerEvents(equipmentGUI, this);
         getServer().getPluginManager().registerEvents(
                 new TamingListener(this, tamingManager), this);
         getServer().getPluginManager().registerEvents(
-                new BondListener(bondManager, petDataCache, mythicMobsIntegration), this);
+                new BondListener(bondManager, petDataCache, mythicMobsIntegration, configManager, this), this);
         getServer().getPluginManager().registerEvents(encyclopediaGUI, this);
         getServer().getPluginManager().registerEvents(evolutionGUI, this);
         getServer().getPluginManager().registerEvents(
-                new PetSkillListener(petSkillManager, petDataCache), this);
-        getServer().getPluginManager().registerEvents(
                 new EquipmentListener(this, petDataCache, statsManager), this);
+        getServer().getPluginManager().registerEvents(
+                new PetInteractListener(this, configManager, petDataCache,
+                        statsManager, skilltreeAssigner), this);
 
         // 9. Commands
         PetCommandManager commandManager = new PetCommandManager(this, tamingManager,
@@ -208,11 +208,12 @@ public final class MyPetAddonPlugin extends JavaPlugin {
     public StatsManager getStatsManager() { return statsManager; }
     public TamingManager getTamingManager() { return tamingManager; }
     public LevelledMobsIntegration getLevelledMobsIntegration() { return levelledMobsIntegration; }
+    public MythicMobsIntegration getMythicMobsIntegration() { return mythicMobsIntegration; }
     public EncyclopediaManager getEncyclopediaManager() { return encyclopediaManager; }
     public EncyclopediaGUI getEncyclopediaGUI() { return encyclopediaGUI; }
     public EvolutionManager getEvolutionManager() { return evolutionManager; }
     public EvolutionGUI getEvolutionGUI() { return evolutionGUI; }
     public EquipmentManager getEquipmentManager() { return equipmentManager; }
     public EquipmentGUI getEquipmentGUI() { return equipmentGUI; }
-    public PetSkillManager getPetSkillManager() { return petSkillManager; }
+    public SkilltreeAssigner getSkilltreeAssigner() { return skilltreeAssigner; }
 }

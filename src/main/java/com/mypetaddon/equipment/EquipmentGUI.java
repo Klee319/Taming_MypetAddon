@@ -69,8 +69,6 @@ public final class EquipmentGUI implements Listener {
         this.equipmentManager = equipmentManager;
         this.petDataCache = petDataCache;
         this.logger = plugin.getLogger();
-
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     // ─── Open GUI ───────────────────────────────────────────────
@@ -139,12 +137,12 @@ public final class EquipmentGUI implements Listener {
             return;
         }
 
-        // Cancel ALL clicks to prevent item duplication
+        // Cancel ALL clicks (both top and bottom inventory) to prevent item duplication
         event.setCancelled(true);
 
         int rawSlot = event.getRawSlot();
 
-        // Ignore clicks outside the GUI top inventory
+        // Ignore clicks outside the GUI top inventory (bottom inventory clicks are cancelled but not processed)
         if (rawSlot < 0 || rawSlot >= SIZE) {
             return;
         }

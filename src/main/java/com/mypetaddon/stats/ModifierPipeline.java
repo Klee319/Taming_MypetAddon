@@ -4,7 +4,9 @@ import com.mypetaddon.bond.BondLevel;
 import com.mypetaddon.config.ConfigManager;
 import com.mypetaddon.data.PetData;
 import com.mypetaddon.data.PetStats;
+import com.mypetaddon.equipment.EquipmentManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Calculates final stat values by applying the modifier pipeline in order:
@@ -13,16 +15,26 @@ import org.jetbrains.annotations.NotNull;
  *   <li>Rarity multiplier</li>
  *   <li>Personality multiplier</li>
  *   <li>Bond level bonus (additive)</li>
+ *   <li>Equipment bonus (additive)</li>
  * </ol>
  *
- * Formula: result = (base * rarityMul * personalityMul) + bondBonus
+ * Formula: result = (base * rarityMul * personalityMul) + bondBonus + equipBonus
  */
 public final class ModifierPipeline {
 
     private final ConfigManager configManager;
+    private volatile EquipmentManager equipmentManager;
 
     public ModifierPipeline(@NotNull ConfigManager configManager) {
         this.configManager = configManager;
+    }
+
+    /**
+     * Sets the equipment manager for equipment bonus calculations.
+     * Called after EquipmentManager is initialized (avoids circular dependency).
+     */
+    public void setEquipmentManager(@Nullable EquipmentManager equipmentManager) {
+        this.equipmentManager = equipmentManager;
     }
 
     /**
@@ -49,7 +61,13 @@ public final class ModifierPipeline {
         // Step 4: Bond level bonus (additive flat bonus)
         double bondBonus = BondLevel.getStatBonus(petData.bondLevel(), statName);
 
+        // Step 5: Equipment bonus (additive)
+        double equipBonus = 0.0;
+        if (equipmentManager != null) {
+            equipBonus = equipmentManager.getEquipmentStatBonus(petData.addonPetId(), statName);
+        }
+
         // Final formula
-        return (base * rarityMul * personalityMul) + bondBonus;
+        return (base * rarityMul * personalityMul) + bondBonus + equipBonus;
     }
 }

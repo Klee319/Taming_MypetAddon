@@ -21,10 +21,11 @@ public record PetStats(
     }
 
     /**
-     * Returns the effective value for a stat (upgraded if available, otherwise base).
+     * Returns the effective value for a stat (base + upgraded, additive).
      */
     public double getEffective(@NotNull String statName) {
-        return upgradedValues.getOrDefault(statName, baseValues.getOrDefault(statName, 0.0));
+        return baseValues.getOrDefault(statName, 0.0)
+                + upgradedValues.getOrDefault(statName, 0.0);
     }
 
     /**

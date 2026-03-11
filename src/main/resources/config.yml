@@ -21,10 +21,17 @@ general:
 taming:
   # --- 動物テイミング ---
   animals:
-    # テイミングに使用するアイテム
-    item: "GOLDEN_APPLE"
-    # テイミング時にアイテムを消費するか
-    consume: true
+    # テイミングに使用するアイテムリスト（複数指定可）
+    # item: マテリアル名（例: "GOLDEN_APPLE"）または "base64:<エンコード済みItemStack>"
+    # success-rate: 成功率（0.0〜1.0、1.0 = 100%）
+    # consume: テイミング試行時にアイテムを消費するか
+    items:
+      - item: "GOLDEN_APPLE"
+        success-rate: 1.0
+        consume: true
+      - item: "ENCHANTED_GOLDEN_APPLE"
+        success-rate: 1.0
+        consume: true
     # テイミング成功時のパーティクル
     particle: "HEART"
     # パーティクルの数
@@ -34,10 +41,14 @@ taming:
 
   # --- モンスターテイミング ---
   monsters:
-    # テイミングに使用するアイテム
-    item: "NETHER_STAR"
-    # テイミング時にアイテムを消費するか
-    consume: true
+    # テイミングに使用するアイテムリスト（複数指定可）
+    # item: マテリアル名（例: "NETHER_STAR"）または "base64:<エンコード済みItemStack>"
+    # success-rate: 成功率（0.0〜1.0、1.0 = 100%）
+    # consume: テイミング試行時にアイテムを消費するか
+    items:
+      - item: "NETHER_STAR"
+        success-rate: 1.0
+        consume: true
     # 名前入力の待機時間 (秒)
     naming-timeout: 30
     # 名前入力に使用するコマンド
@@ -464,12 +475,24 @@ pet-base-values:
 # 7. リロールアイテム設定
 # --------------------------------------------------------------------------
 reroll-items:
-  # レアリティのリロールに使用するアイテム
-  reroll-item: "AMETHYST_SHARD"
-  # レアリティのアップグレードに使用するアイテム
-  upgrade-item: "NETHER_STAR"
-  # スキルツリーのリロールに使用するアイテム
-  skilltree-reroll-item: "ECHO_SHARD"
+  # リロールアイテムリスト（複数指定可）
+  # item: マテリアル名または "base64:<エンコード済みItemStack>"
+  # type: アイテムの用途（reroll = レアリティ再抽選, upgrade = レアリティアップグレード, skilltree = スキルツリー再抽選, stat-add = 基礎ステータス+1）
+  # success-rate: 成功率（0.0〜1.0、1.0 = 100%）
+  # consume: 使用時にアイテムを消費するか
+  items:
+    - item: "AMETHYST_SHARD"
+      type: "reroll"
+      success-rate: 1.0
+      consume: true
+    - item: "NETHER_STAR"
+      type: "upgrade"
+      success-rate: 0.5
+      consume: true
+    - item: "ECHO_SHARD"
+      type: "skilltree"
+      success-rate: 1.0
+      consume: true
 
 # --------------------------------------------------------------------------
 # 8. 進化設定
@@ -529,77 +552,56 @@ evolutions:
       Damage: 1.25
 
 # --------------------------------------------------------------------------
-# 9. ペットスキル設定
+# 9. スキルツリー自動割り当て設定
 # --------------------------------------------------------------------------
-pet-skills:
-  CREEPER:
-    self-destruct:
-      # スキル表示名
-      display-name: "§c自爆"
-      # スキル説明
-      description: "周囲の敵に大ダメージを与えるが、ペットもダメージを受ける"
-      # クールダウン (秒)
-      cooldown: 60
-      # 爆発半径
-      radius: 5.0
-      # 爆発ダメージ
-      damage: 20.0
-      # ペット自身へのダメージ割合
-      self-damage-percent: 0.3
-      # ブロック破壊を行うか
-      break-blocks: false
-      # パーティクル
-      particle: "EXPLOSION_EMITTER"
-      # サウンド
-      sound: "ENTITY_GENERIC_EXPLODE"
+# テイム時にスキルツリーを自動的に割り当てます。
+# 優先度: per-rarity > per-mob > default > MyPet組み込みランダム
+# skilltree: MyPetに登録されているスキルツリー名（skilltrees/*.st.json の名前）
+# weight: 選出重み（大きいほど選ばれやすい）
+#
+# MyPet標準のスキルツリー: Combat, Farm, PvP, Ride, Utility
+# カスタムスキルツリーは plugins/MyPet/skilltrees/ に追加してください
+skilltree-assignment:
+  # --- デフォルト（特定の指定がない場合） ---
+  default:
+    - skilltree: "Combat"
+      weight: 30
+    - skilltree: "Utility"
+      weight: 25
+    - skilltree: "Farm"
+      weight: 20
+    - skilltree: "Ride"
+      weight: 15
+    - skilltree: "PvP"
+      weight: 10
 
-  WOLF:
-    howl:
-      display-name: "§e遠吠え"
-      description: "周囲の味方のステータスを一時的に強化する"
-      cooldown: 45
-      # 効果半径
-      radius: 10.0
-      # バフ持続時間 (秒)
-      duration: 15
-      # 攻撃力バフ倍率
-      damage-buff: 1.20
-      # 移動速度バフ倍率
-      speed-buff: 1.15
-      particle: "NOTE"
-      sound: "ENTITY_WOLF_HOWL"
+  # --- レアリティ別オーバーライド（上位レアリティに強力なツリーを） ---
+  # per-rarity:
+  #   MYTHIC:
+  #     - skilltree: "Combat"
+  #       weight: 50
+  #     - skilltree: "PvP"
+  #       weight: 50
+  #   LEGENDARY:
+  #     - skilltree: "Combat"
+  #       weight: 40
+  #     - skilltree: "PvP"
+  #       weight: 30
+  #     - skilltree: "Utility"
+  #       weight: 30
 
-  ENDERMAN:
-    teleport-sync:
-      display-name: "§5テレポート同期"
-      description: "オーナーの位置に瞬時にテレポートし、周囲の敵にダメージを与える"
-      cooldown: 30
-      # テレポート着地時のダメージ半径
-      landing-radius: 3.0
-      # テレポート着地時のダメージ
-      landing-damage: 8.0
-      # テレポート後の無敵時間 (tick)
-      invulnerable-ticks: 20
-      particle: "PORTAL"
-      sound: "ENTITY_ENDERMAN_TELEPORT"
-
-  BLAZE:
-    fire-rain:
-      display-name: "§6炎の雨"
-      description: "指定範囲に炎の雨を降らせ、範囲内の敵に継続ダメージを与える"
-      cooldown: 40
-      # 炎の雨の半径
-      radius: 6.0
-      # 1回あたりのダメージ
-      damage-per-tick: 3.0
-      # 持続時間 (秒)
-      duration: 5
-      # ダメージ間隔 (tick)
-      tick-interval: 10
-      # 敵に付与する炎上時間 (tick)
-      fire-ticks: 60
-      particle: "FLAME"
-      sound: "ENTITY_BLAZE_SHOOT"
+  # --- モブタイプ別オーバーライド ---
+  # per-mob:
+  #   WOLF:
+  #     - skilltree: "Combat"
+  #       weight: 60
+  #     - skilltree: "Ride"
+  #       weight: 40
+  #   HORSE:
+  #     - skilltree: "Ride"
+  #       weight: 80
+  #     - skilltree: "Farm"
+  #       weight: 20
 
 # --------------------------------------------------------------------------
 # 10. 装備設定
@@ -672,11 +674,6 @@ sounds:
     sound: "UI_TOAST_CHALLENGE_COMPLETE"
     volume: 1.0
     pitch: 1.0
-  # スキル使用
-  skill-use:
-    sound: "ENTITY_EVOKER_CAST_SPELL"
-    volume: 0.8
-    pitch: 1.0
   # レアリティアップグレード
   rarity-upgrade:
     sound: "ENTITY_ENDER_DRAGON_GROWL"
@@ -699,7 +696,8 @@ messages:
 
   # --- テイミング ---
   tame-success: "§a%pet_name% §7をテイミングしました！ (レアリティ: %rarity%, 性格: %personality%)"
-  tame-fail: "§cテイミングに失敗しました。"
+  tame-fail: "§cテイミングに失敗しました..."
+  tame-fail-rate: "§cテイミングに失敗しました... (成功率: §f%rate%%§c)"
   tame-excluded: "§cこのモブはテイミングできません。"
   tame-monster-start: "§eモンスターテイミングを開始しました。§f%timeout%秒§e以内にチャットで名前を入力してください。"
   tame-monster-naming: "§aペットの名前を入力してください (§f%command%§a を使用)"
@@ -732,11 +730,7 @@ messages:
   evolution-fail-item: "§c進化には §f%required_item% x%required_amount% §cが必要です。"
   evolution-not-available: "§cこのペットには進化先がありません。"
 
-  # --- スキル ---
-  skill-use-success: "§b%pet_name% が §f%skill_name% §bを使用しました！"
-  skill-cooldown: "§c%skill_name% はあと §f%remaining%秒 §cでクールダウン終了です。"
-  skill-not-learned: "§cこのペットはそのスキルを習得していません。"
-  skill-no-slots: "§cスキルスロットに空きがありません。(最大: §f%max_slots%§c)"
+  # --- スキルツリー ---
   skilltree-reroll-success: "§eスキルツリーを再抽選しました！"
 
   # --- 装備 ---
@@ -759,7 +753,6 @@ messages:
   status-bond: "§7絆: Lv.§f%bond_level% §8(§7%bond_exp%§8)"
   status-life: "§7体力: §c%life%"
   status-damage: "§7攻撃力: §c%damage%"
-  status-skills: "§7スキル: §f%skills%"
   status-footer: "§8§m------------------------------------------"
 
   # --- リロール ---

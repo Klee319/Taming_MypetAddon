@@ -59,9 +59,6 @@ public final class StatsManager implements Listener {
         this.petDataCache = petDataCache;
         this.modifierPipeline = modifierPipeline;
         this.logger = plugin.getLogger();
-
-        // Register this as a listener for MyPet events
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     /**
@@ -87,8 +84,10 @@ public final class StatsManager implements Listener {
         List<Runnable> unloaders = new ArrayList<>();
         activeModifiers.put(myPet.getUUID(), unloaders);
 
-        // Apply stat modifiers for each base stat
-        for (String statName : petStats.baseValues().keySet()) {
+        // Apply stat modifiers for all stats (base and upgraded)
+        java.util.Set<String> allStatNames = new java.util.LinkedHashSet<>(petStats.baseValues().keySet());
+        allStatNames.addAll(petStats.upgradedValues().keySet());
+        for (String statName : allStatNames) {
             double finalValue = modifierPipeline.calculate(statName, petData, petStats);
 
             try {
@@ -152,6 +151,14 @@ public final class StatsManager implements Listener {
             }
         }
         activeModifiers.clear();
+    }
+
+    /**
+     * Returns the modifier pipeline used for stat calculations.
+     */
+    @NotNull
+    public ModifierPipeline getModifierPipeline() {
+        return modifierPipeline;
     }
 
     /**

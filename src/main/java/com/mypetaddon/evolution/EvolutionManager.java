@@ -89,7 +89,7 @@ public final class EvolutionManager {
         }
 
         // Check min-level condition
-        int minLevel = evoSection.getInt("min-level", 1);
+        int minLevel = evoSection.getInt("conditions.min-level", 1);
         if (myPet.getExperience().getLevel() < minLevel) {
             return EvolutionCheck.fail(
                     "レベルが足りません。必要レベル: " + minLevel
@@ -97,7 +97,7 @@ public final class EvolutionManager {
         }
 
         // Check min-bond-level condition
-        int minBondLevel = evoSection.getInt("min-bond-level", 0);
+        int minBondLevel = evoSection.getInt("conditions.min-bond-level", 0);
         if (petData.bondLevel() < minBondLevel) {
             return EvolutionCheck.fail(
                     "絆レベルが足りません。必要絆レベル: " + minBondLevel
@@ -105,7 +105,7 @@ public final class EvolutionManager {
         }
 
         // Check required-item condition
-        String requiredItemName = evoSection.getString("required-item", "");
+        String requiredItemName = evoSection.getString("conditions.required-item", "");
         if (!requiredItemName.isEmpty()) {
             Material requiredMaterial = Material.matchMaterial(requiredItemName);
             if (requiredMaterial == null) {
@@ -124,7 +124,7 @@ public final class EvolutionManager {
         }
 
         // Parse stat bonuses
-        Map<String, Integer> statBonus = parseStatBonus(evoSection);
+        Map<String, Double> statBonus = parseStatBonus(evoSection);
 
         return new EvolutionCheck(true, "進化可能です。", targetType, statBonus);
     }
@@ -223,12 +223,16 @@ public final class EvolutionManager {
                     .withMobType(targetType);
 
             // Apply evolution stat bonuses to upgraded values
+            // Stat bonus values are multipliers (e.g. 1.15 = +15% of base)
             PetStats updatedStats = backupStats != null ? backupStats : new PetStats(
                     addonPetId, Map.of(), Map.of());
-            for (Map.Entry<String, Integer> bonus : check.statBonus().entrySet()) {
-                double currentValue = updatedStats.getEffective(bonus.getKey());
+            for (Map.Entry<String, Double> bonus : check.statBonus().entrySet()) {
+                double baseValue = updatedStats.baseValues().getOrDefault(bonus.getKey(), 0.0);
+                double currentUpgraded = updatedStats.upgradedValues().getOrDefault(bonus.getKey(), 0.0);
+                // Apply multiplier to base and add as upgrade bonus
+                double evolutionBonus = baseValue * (bonus.getValue() - 1.0);
                 updatedStats = updatedStats.withUpgradedStat(
-                        bonus.getKey(), currentValue + bonus.getValue());
+                        bonus.getKey(), currentUpgraded + evolutionBonus);
             }
 
             // Update cache (old key invalidated, new key inserted)
@@ -285,7 +289,7 @@ public final class EvolutionManager {
     @NotNull
     public Optional<String> getEvolutionTarget(@NotNull String mobType) {
         String target = configManager.getConfig()
-                .getString("evolutions." + mobType + ".evolves-to", "");
+                .getString("evolutions." + mobType + ".target", "");
         return target.isEmpty() ? Optional.empty() : Optional.of(target);
     }
 
@@ -369,7 +373,7 @@ public final class EvolutionManager {
             boolean canEvolve,
             @NotNull String reason,
             @NotNull String targetType,
-            @NotNull Map<String, Integer> statBonus
+            @NotNull Map<String, Double> statBonus
     ) {
         public EvolutionCheck {
             statBonus = Map.copyOf(statBonus);
@@ -387,15 +391,15 @@ public final class EvolutionManager {
      * Parses stat bonuses from the evolution config section.
      */
     @NotNull
-    private Map<String, Integer> parseStatBonus(@NotNull ConfigurationSection evoSection) {
+    private Map<String, Double> parseStatBonus(@NotNull ConfigurationSection evoSection) {
         ConfigurationSection bonusSection = evoSection.getConfigurationSection("stat-bonus");
         if (bonusSection == null) {
             return Map.of();
         }
 
-        Map<String, Integer> bonuses = new LinkedHashMap<>();
+        Map<String, Double> bonuses = new LinkedHashMap<>();
         for (String statName : bonusSection.getKeys(false)) {
-            bonuses.put(statName, bonusSection.getInt(statName, 0));
+            bonuses.put(statName, bonusSection.getDouble(statName, 1.0));
         }
         return Collections.unmodifiableMap(bonuses);
     }
@@ -405,7 +409,7 @@ public final class EvolutionManager {
      */
     private void consumeRequiredItem(@NotNull Player player, @NotNull String mobType) {
         String requiredItemName = configManager.getConfig()
-                .getString("evolutions." + mobType + ".required-item", "");
+                .getString("evolutions." + mobType + ".conditions.required-item", "");
         if (requiredItemName.isEmpty()) {
             return;
         }

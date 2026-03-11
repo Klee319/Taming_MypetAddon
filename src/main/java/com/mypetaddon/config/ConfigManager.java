@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -77,7 +78,7 @@ public final class ConfigManager {
      */
     @NotNull
     public Map<Rarity, Integer> getRarityChances(int mobLevel) {
-        ConfigurationSection ranges = config.getConfigurationSection("rarity-chances.level-ranges");
+        ConfigurationSection ranges = config.getConfigurationSection("rarity.level-ranges");
         if (ranges == null) {
             return getNoLevelledMobsFallback();
         }
@@ -96,7 +97,7 @@ public final class ConfigManager {
      */
     @NotNull
     public Map<Rarity, Integer> getNoLevelledMobsFallback() {
-        ConfigurationSection section = config.getConfigurationSection("rarity-chances.no-levelledmobs-fallback");
+        ConfigurationSection section = config.getConfigurationSection("rarity.no-levelledmobs-fallback");
         if (section == null) {
             // Default: COMMON only
             return Map.of(Rarity.COMMON, 100);
@@ -108,14 +109,14 @@ public final class ConfigManager {
      * Returns the environment bonus value for a given condition (e.g. "full-moon", "thunderstorm").
      */
     public int getEnvironmentBonus(@NotNull String condition) {
-        return config.getInt("rarity-chances.environment-bonuses." + condition, 0);
+        return config.getInt("rarity.environment-bonuses." + condition, 0);
     }
 
     /**
      * Returns the maximum bonus cap for environment bonuses.
      */
     public int getMaxBonusCap() {
-        return config.getInt("rarity-chances.max-bonus-cap", 50);
+        return config.getInt("rarity.environment-bonuses.max-bonus-cap", 20);
     }
 
     // ─── Personality ─────────────────────────────────────────────
@@ -132,20 +133,36 @@ public final class ConfigManager {
     // ─── Taming ──────────────────────────────────────────────────
 
     /**
-     * Returns the taming config section accessors.
+     * Immutable descriptor for a taming item entry in config.
+     *
+     * @param itemDescriptor Material name or "base64:..." encoded ItemStack
+     * @param successRate    probability 0.0-1.0
+     * @param consume        whether to consume the item on use
+     */
+    public record TamingItemEntry(
+            @NotNull String itemDescriptor,
+            double successRate,
+            boolean consume
+    ) {}
+
+    /**
+     * Returns the list of taming items for animals from config.
      */
     @NotNull
-    public String getTamingAnimalItem() {
-        return config.getString("taming.animal-item", "ENCHANTED_GOLDEN_APPLE");
+    public List<TamingItemEntry> getTamingAnimalItems() {
+        return parseTamingItems("taming.animals.items");
     }
 
+    /**
+     * Returns the list of taming items for monsters from config.
+     */
     @NotNull
-    public String getTamingMonsterItem() {
-        return config.getString("taming.monster-item", "DIAMOND");
+    public List<TamingItemEntry> getTamingMonsterItems() {
+        return parseTamingItems("taming.monsters.items");
     }
 
     public long getTamingTimeout() {
-        return config.getLong("taming.timeout-seconds", 30) * 1000L;
+        return config.getLong("taming.monsters.naming-timeout", 30) * 1000L;
     }
 
     public int getTamingMaxDistance() {
@@ -154,6 +171,48 @@ public final class ConfigManager {
 
     public boolean isTamingRequireKill() {
         return config.getBoolean("taming.monster-require-kill", true);
+    }
+
+    // ─── Reroll Items ────────────────────────────────────────────
+
+    /**
+     * Immutable descriptor for a reroll item entry in config.
+     *
+     * @param itemDescriptor Material name or "base64:..." encoded ItemStack
+     * @param type           one of: "reroll", "upgrade", "skilltree", "stat-add"
+     * @param successRate    probability 0.0-1.0
+     * @param consume        whether to consume the item on use
+     */
+    public record RerollItemEntry(
+            @NotNull String itemDescriptor,
+            @NotNull String type,
+            double successRate,
+            boolean consume
+    ) {}
+
+    /**
+     * Returns the list of reroll items from config.
+     */
+    @NotNull
+    public List<RerollItemEntry> getRerollItems() {
+        List<?> rawList = config.getList("reroll-items.items");
+        if (rawList == null) {
+            return Collections.emptyList();
+        }
+
+        List<RerollItemEntry> result = new ArrayList<>();
+        for (Object obj : rawList) {
+            if (obj instanceof Map<?, ?> map) {
+                String item = map.get("item") != null ? String.valueOf(map.get("item")) : "";
+                String type = map.get("type") != null ? String.valueOf(map.get("type")) : "reroll";
+                double rate = parseDouble(map.get("success-rate"), 1.0);
+                boolean consume = parseBoolean(map.get("consume"), true);
+                if (!item.isEmpty()) {
+                    result.add(new RerollItemEntry(item, type, rate, consume));
+                }
+            }
+        }
+        return Collections.unmodifiableList(result);
     }
 
     // ─── Bond ────────────────────────────────────────────────────
@@ -176,7 +235,7 @@ public final class ConfigManager {
      * Returns the debounce interval in milliseconds for a bond source.
      */
     public long getBondDebounce(@NotNull String source) {
-        return config.getLong("bond.debounce." + source, 0L);
+        return config.getLong("bond.debounce." + source + "-cooldown", 0L);
     }
 
     // ─── Pet Base Values ─────────────────────────────────────────
@@ -209,7 +268,7 @@ public final class ConfigManager {
      */
     @Nullable
     public ConfigurationSection getRarityTier(@NotNull Rarity rarity) {
-        return config.getConfigurationSection("rarity-tiers." + rarity.name());
+        return config.getConfigurationSection("rarity.tiers." + rarity.name());
     }
 
     // ─── LevelledMobs PDC Key ────────────────────────────────────
@@ -246,6 +305,51 @@ public final class ConfigManager {
     }
 
     // ─── Internal Helpers ────────────────────────────────────────
+
+    @NotNull
+    private List<TamingItemEntry> parseTamingItems(@NotNull String configPath) {
+        List<?> rawList = config.getList(configPath);
+        if (rawList == null) {
+            return Collections.emptyList();
+        }
+
+        List<TamingItemEntry> result = new ArrayList<>();
+        for (Object obj : rawList) {
+            if (obj instanceof Map<?, ?> map) {
+                String item = map.get("item") != null ? String.valueOf(map.get("item")) : "";
+                double rate = parseDouble(map.get("success-rate"), 1.0);
+                boolean consume = parseBoolean(map.get("consume"), true);
+                if (!item.isEmpty()) {
+                    result.add(new TamingItemEntry(item, rate, consume));
+                }
+            }
+        }
+        return Collections.unmodifiableList(result);
+    }
+
+    private double parseDouble(@Nullable Object obj, double defaultValue) {
+        if (obj instanceof Number num) {
+            return num.doubleValue();
+        }
+        if (obj instanceof String str) {
+            try {
+                return Double.parseDouble(str);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    private boolean parseBoolean(@Nullable Object obj, boolean defaultValue) {
+        if (obj instanceof Boolean bool) {
+            return bool;
+        }
+        if (obj instanceof String str) {
+            return Boolean.parseBoolean(str);
+        }
+        return defaultValue;
+    }
 
     private boolean matchesLevelRange(@NotNull String rangeKey, int level) {
         if (rangeKey.endsWith("+")) {

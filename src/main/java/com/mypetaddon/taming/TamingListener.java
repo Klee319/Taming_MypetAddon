@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Event listener that delegates taming interactions to {@link TamingManager}.
@@ -29,7 +28,7 @@ public final class TamingListener implements Listener {
                           @NotNull TamingManager tamingManager) {
         this.plugin = plugin;
         this.tamingManager = tamingManager;
-        this.mythicMobsIntegration = resolveMythicMobs(plugin);
+        this.mythicMobsIntegration = plugin.getMythicMobsIntegration();
     }
 
     @EventHandler
@@ -93,20 +92,4 @@ public final class TamingListener implements Listener {
         }
     }
 
-    // ─── Internal ────────────────────────────────────────────────
-
-    /**
-     * Resolves the MythicMobs integration from the plugin's private field.
-     * The plugin class declares the field but does not expose a public getter.
-     */
-    @Nullable
-    private static MythicMobsIntegration resolveMythicMobs(@NotNull MyPetAddonPlugin plugin) {
-        try {
-            var field = MyPetAddonPlugin.class.getDeclaredField("mythicMobsIntegration");
-            field.setAccessible(true);
-            return (MythicMobsIntegration) field.get(plugin);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

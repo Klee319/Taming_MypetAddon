@@ -16,7 +16,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,13 +31,19 @@ public final class BondListener implements Listener {
     private final BondManager bondManager;
     private final PetDataCache petDataCache;
     private final MythicMobsIntegration mythicMobsIntegration;
+    private final ConfigManager configManager;
+    private final JavaPlugin plugin;
 
     public BondListener(@NotNull BondManager bondManager,
                         @NotNull PetDataCache petDataCache,
-                        @NotNull MythicMobsIntegration mythicMobsIntegration) {
+                        @NotNull MythicMobsIntegration mythicMobsIntegration,
+                        @NotNull ConfigManager configManager,
+                        @NotNull JavaPlugin plugin) {
         this.bondManager = bondManager;
         this.petDataCache = petDataCache;
         this.mythicMobsIntegration = mythicMobsIntegration;
+        this.configManager = configManager;
+        this.plugin = plugin;
     }
 
     /**
@@ -113,26 +121,33 @@ public final class BondListener implements Listener {
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        // Get active MyPet for this player
-        MyPet myPet = getActiveMyPet(player);
-        if (myPet == null) {
-            return;
-        }
+        // Preload pet data asynchronously to avoid sync DB hits on cache misses
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            petDataCache.preloadForPlayer(player.getUniqueId());
 
-        PetData petData = petDataCache.get(myPet.getUUID());
-        if (petData == null) {
-            return;
-        }
+            // After preload, apply bond logic on the main thread
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                MyPet myPet = getActiveMyPet(player);
+                if (myPet == null) {
+                    return;
+                }
 
-        // Apply daily decay based on last login time
-        long lastPlayed = player.getLastPlayed();
-        if (lastPlayed > 0) {
-            bondManager.applyDailyDecay(petData.addonPetId(), lastPlayed);
-        }
+                PetData petData = petDataCache.get(myPet.getUUID());
+                if (petData == null) {
+                    return;
+                }
 
-        // Award login-summon bond EXP
-        bondManager.addBondExp(petData.addonPetId(), "login-summon",
-                getBondGainFromConfig("login-summon"), petData.personality());
+                // Apply daily decay based on last login time
+                long lastPlayed = player.getLastPlayed();
+                if (lastPlayed > 0) {
+                    bondManager.applyDailyDecay(petData.addonPetId(), lastPlayed);
+                }
+
+                // Award login-summon bond EXP
+                bondManager.addBondExp(petData.addonPetId(), "login-summon",
+                        getBondGainFromConfig("login-summon"), petData.personality());
+            });
+        });
     }
 
     // ─── Internal ────────────────────────────────────────────────
@@ -159,15 +174,6 @@ public final class BondListener implements Listener {
      * Returns 0 if not configured.
      */
     private int getBondGainFromConfig(@NotNull String source) {
-        // Access ConfigManager through BondManager's reflection or direct reference
-        // For simplicity, we use a hardcoded default if config is unavailable
-        try {
-            var field = BondManager.class.getDeclaredField("configManager");
-            field.setAccessible(true);
-            ConfigManager configManager = (ConfigManager) field.get(bondManager);
-            return configManager.getBondGain(source);
-        } catch (Exception e) {
-            return 0;
-        }
+        return configManager.getBondGain(source);
     }
 }

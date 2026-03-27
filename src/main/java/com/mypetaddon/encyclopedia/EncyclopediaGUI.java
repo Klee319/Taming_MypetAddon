@@ -19,6 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.mypetaddon.util.MobNameTranslator;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -90,8 +92,12 @@ public final class EncyclopediaGUI implements Listener {
             int safePage = Math.max(1, Math.min(page, maxPages));
 
             // Switch to main thread for inventory operations
-            Bukkit.getScheduler().runTask(plugin, () ->
-                    populateAndOpen(player, displayEntries, safePage, maxPages, completionPercent));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+                populateAndOpen(player, displayEntries, safePage, maxPages, completionPercent);
+            });
         });
     }
 
@@ -350,7 +356,7 @@ public final class EncyclopediaGUI implements Listener {
 
             if (meta != null) {
                 Rarity rarity = entry.highestRarity();
-                meta.setDisplayName("§a" + mobType + " " + rarity.getColoredName());
+                meta.setDisplayName("§a" + MobNameTranslator.translate(mobType) + " " + rarity.getColoredName());
 
                 List<String> lore = new ArrayList<>();
                 lore.add("§7テイム回数: §f" + entry.tameCount() + "x");

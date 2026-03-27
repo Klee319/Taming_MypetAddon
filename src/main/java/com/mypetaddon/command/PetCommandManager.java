@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 /**
  * Registers and handles all plugin commands using the Bukkit CommandExecutor pattern.
- * Supports /petname, /petstatus, and /petadmin with tab completion.
+ * Supports /pettame, /petstatus, and /petadmin with tab completion.
  */
 public final class PetCommandManager implements CommandExecutor, TabCompleter {
 
@@ -53,6 +53,8 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
     private final StatsManager statsManager;
     private final BondManager bondManager;
     private final ConfigManager configManager;
+    private final PetReleaseGUI petReleaseGUI;
+    private final PetSkillGUI petSkillGUI;
     private final Logger logger;
 
     public PetCommandManager(@NotNull MyPetAddonPlugin plugin,
@@ -60,13 +62,17 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
                              @NotNull PetDataCache petDataCache,
                              @NotNull StatsManager statsManager,
                              @NotNull BondManager bondManager,
-                             @NotNull ConfigManager configManager) {
+                             @NotNull ConfigManager configManager,
+                             @NotNull PetReleaseGUI petReleaseGUI,
+                             @NotNull PetSkillGUI petSkillGUI) {
         this.plugin = plugin;
         this.tamingManager = tamingManager;
         this.petDataCache = petDataCache;
         this.statsManager = statsManager;
         this.bondManager = bondManager;
         this.configManager = configManager;
+        this.petReleaseGUI = petReleaseGUI;
+        this.petSkillGUI = petSkillGUI;
         this.logger = plugin.getLogger();
     }
 
@@ -75,12 +81,14 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
      * Commands must be declared in plugin.yml.
      */
     public void registerCommands() {
-        registerCommand("petname");
+        registerCommand("pettame");
         registerCommand("petstatus");
         registerCommand("petadmin");
         registerCommand("petevolve");
         registerCommand("petequip");
         registerCommand("petdex");
+        registerCommand("petrelease");
+        registerCommand("petst");
     }
 
     private void registerCommand(@NotNull String name) {
@@ -101,17 +109,19 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
                              @NotNull String label,
                              @NotNull String[] args) {
         return switch (command.getName().toLowerCase(Locale.ROOT)) {
-            case "petname" -> handlePetName(sender, args);
+            case "pettame" -> handlePetName(sender, args);
             case "petstatus" -> handlePetStatus(sender);
             case "petadmin" -> handlePetAdmin(sender, args);
             case "petevolve" -> handlePetEvolve(sender);
             case "petequip" -> handlePetEquip(sender);
             case "petdex" -> handlePetDex(sender);
+            case "petrelease" -> handlePetRelease(sender);
+            case "petst" -> handlePetSkill(sender);
             default -> false;
         };
     }
 
-    // ─── /petname <name> ─────────────────────────────────────────
+    // ─── /pettame <name> ─────────────────────────────────────────
 
     private boolean handlePetName(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
@@ -125,7 +135,7 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            player.sendMessage(PREFIX + "§cUsage: /petname <name>");
+            player.sendMessage(PREFIX + "§cUsage: /pettame <name>");
             return true;
         }
 
@@ -186,20 +196,24 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         player.sendMessage("§8§m─────────────────────────────────");
         player.sendMessage("  " + rarity.getColor() + "§l" + myPet.getPetName()
                 + " §8| " + rarity.getColoredName());
-        player.sendMessage("  §7Type: §f" + petData.mobType()
-                + " §8| §7Personality: §f" + petData.personality().getDisplayName());
+        player.sendMessage("  §7種類: §f" + translateMobName(petData.mobType())
+                + " §8| §7性格: §f" + translatePersonalityName(petData.personality()));
         player.sendMessage("");
 
         // Bond level + progress bar
         String bondBar = buildProgressBar(bondExp, bondLevel);
-        player.sendMessage("  §7Bond: §e" + bondLevelLabel(bondLevel) + " §8(Lv." + bondLevel + ")");
+        player.sendMessage("  §7好感度: §e" + bondLevelLabel(bondLevel) + " §8(Lv." + bondLevel + ")");
         player.sendMessage("  " + bondBar + " §7" + bondExp + " EXP");
         player.sendMessage("");
 
         // Stat breakdown (use ModifierPipeline for accurate final values)
         if (petStats != null) {
             ModifierPipeline pipeline = plugin.getStatsManager().getModifierPipeline();
-            player.sendMessage("  §7§nStat Breakdown:");
+            int petLevel = 0;
+            try {
+                petLevel = myPet.getExperience().getLevel();
+            } catch (Exception ignored) {}
+            player.sendMessage("  §7§nステータス内訳:");
             java.util.Set<String> allStatNames = new java.util.LinkedHashSet<>(petStats.baseValues().keySet());
             allStatNames.addAll(petStats.upgradedValues().keySet());
             for (String statName : allStatNames) {
@@ -208,19 +222,21 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
                 double rarityMult = rarity.getStatMultiplier();
                 double personalityMod = petData.personality().getModifier(statName, 1.0);
                 double bondBonus = BondLevel.getStatBonus(bondLevel, statName);
-                double finalValue = pipeline.calculate(statName, petData, petStats);
+                double finalValue = pipeline.calculate(statName, petData, petStats, petLevel);
 
+                // Damage and Life are displayed as integers, Speed as decimal
+                String format = ("Damage".equals(statName) || "Life".equals(statName))
+                        ? "  §7%s: §f%.1f §8(基礎+%.1f) §7x§e%.2f §8(レア) §7x§b%.2f §8(性格) §7+§a%.2f §8(親密度) §7= §f%.0f"
+                        : "  §7%s: §f%.1f §8(基礎+%.1f) §7x§e%.2f §8(レア) §7x§b%.2f §8(性格) §7+§a%.2f §8(親密度) §7= §f%.1f";
                 player.sendMessage(String.format(
-                        "  §7%s: §f%.1f §8(base+%.1f) §7x§e%.2f §8(rarity) §7x§b%.2f §8(personality) §7+§a%.2f §8(bond) §7= §f%.1f",
-                        capitalize(statName), base, upgraded, rarityMult, personalityMod, bondBonus, finalValue
+                        format,
+                        translateStatName(statName), base, upgraded, rarityMult, personalityMod, bondBonus, finalValue
                 ));
             }
         } else {
-            player.sendMessage("  §7Stats: §8(not available)");
+            player.sendMessage("  §7ステータス: §8(データなし)");
         }
 
-        player.sendMessage("");
-        player.sendMessage("  §7Awakening: " + (rarity.isAwakeningEligible() ? "§aEligible" : "§8Ineligible"));
         player.sendMessage("§8§m─────────────────────────────────");
     }
 
@@ -245,13 +261,35 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
     @NotNull
     private String bondLevelLabel(int level) {
         return switch (level) {
-            case 1 -> "Stranger";
-            case 2 -> "Acquaintance";
-            case 3 -> "Companion";
-            case 4 -> "Trusted";
-            case 5 -> "Soulbound";
-            default -> "Unknown";
+            case 1 -> "初対面";
+            case 2 -> "知人";
+            case 3 -> "仲間";
+            case 4 -> "信頼";
+            case 5 -> "魂の絆";
+            default -> "不明";
         };
+    }
+
+    @NotNull
+    private String translateStatName(@NotNull String statName) {
+        return switch (statName) {
+            case "Life" -> "体力";
+            case "Damage" -> "攻撃力";
+            case "Speed" -> "速度";
+            default -> statName;
+        };
+    }
+
+    @NotNull
+    private String translatePersonalityName(@NotNull com.mypetaddon.personality.Personality personality) {
+        String configName = plugin.getConfigManager().getString(
+                "personalities." + personality.name() + ".display-name", "");
+        return configName.isEmpty() ? personality.getDisplayName() : configName;
+    }
+
+    @NotNull
+    private String translateMobName(@NotNull String mobType) {
+        return com.mypetaddon.util.MobNameTranslator.translate(mobType);
     }
 
     // ─── /petevolve ─────────────────────────────────────────────
@@ -273,14 +311,33 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         }
 
         EvolutionManager evoManager = plugin.getEvolutionManager();
-        EvolutionManager.EvolutionCheck check = evoManager.canEvolve(myPet);
-        if (!check.canEvolve()) {
-            player.sendMessage(PREFIX + "§c" + check.reason());
+        List<EvolutionManager.BranchCheck> allChecks = evoManager.checkBranches(myPet);
+
+        if (allChecks.isEmpty()) {
+            player.sendMessage(PREFIX + "§cこのペットには進化先がありません。");
             return true;
         }
 
-        // Open confirmation GUI
-        plugin.getEvolutionGUI().openConfirmation(player, myPet, check);
+        List<EvolutionManager.BranchCheck> eligible = allChecks.stream()
+                .filter(EvolutionManager.BranchCheck::eligible)
+                .toList();
+
+        if (eligible.isEmpty()) {
+            // Show unmet conditions for each branch
+            player.sendMessage(PREFIX + "§c進化条件を満たしていません。");
+            for (EvolutionManager.BranchCheck check : allChecks) {
+                player.sendMessage("§7 - §e" + check.branch().displayName()
+                        + "§7: §c" + check.reason());
+            }
+            return true;
+        }
+
+        // Single branch total → direct confirmation; multiple → branch selection GUI
+        if (allChecks.size() == 1) {
+            plugin.getEvolutionGUI().openConfirmation(player, myPet, eligible.get(0));
+        } else {
+            plugin.getEvolutionGUI().openBranchSelection(player, myPet, allChecks);
+        }
         return true;
     }
 
@@ -325,6 +382,50 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         }
 
         plugin.getEncyclopediaGUI().openEncyclopedia(player, 0);
+        return true;
+    }
+
+    // ─── /petrelease ────────────────────────────────────────────
+
+    private boolean handlePetRelease(@NotNull CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(PREFIX + "§cThis command can only be used by players.");
+            return true;
+        }
+        if (!player.hasPermission("mypetaddon.release")) {
+            player.sendMessage(PREFIX + "§cYou do not have permission to use this command.");
+            return true;
+        }
+
+        MyPet myPet = getActiveMyPet(player);
+        if (myPet == null) {
+            player.sendMessage(PREFIX + "§cアクティブなペットがいません。");
+            return true;
+        }
+
+        petReleaseGUI.openReleaseConfirmation(player, myPet);
+        return true;
+    }
+
+    // ─── /petskill ─────────────────────────────────────────────
+
+    private boolean handlePetSkill(@NotNull CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(PREFIX + "§cThis command can only be used by players.");
+            return true;
+        }
+        if (!player.hasPermission("mypetaddon.skill")) {
+            player.sendMessage(PREFIX + "§cYou do not have permission to use this command.");
+            return true;
+        }
+
+        MyPet myPet = getActiveMyPet(player);
+        if (myPet == null) {
+            player.sendMessage(PREFIX + "§cアクティブなペットがいません。");
+            return true;
+        }
+
+        petSkillGUI.openSkillGUI(player, myPet);
         return true;
     }
 
@@ -404,12 +505,7 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         }
 
         // Create updated PetData with new rarity
-        PetData updated = new PetData(
-                petData.addonPetId(), petData.mypetUuid(), petData.ownerUuid(),
-                petData.mobType(), newRarity, petData.personality(),
-                petData.bondLevel(), petData.bondExp(),
-                petData.originalLmLevel(), petData.createdAt(), petData.evolvedFrom()
-        );
+        PetData updated = petData.withRarity(newRarity);
 
         PetStats currentStats = petDataCache.getStats(petData.addonPetId());
         if (currentStats != null) {
@@ -506,12 +602,14 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
                                       @NotNull String alias,
                                       @NotNull String[] args) {
         return switch (command.getName().toLowerCase(Locale.ROOT)) {
-            case "petname" -> Collections.emptyList();
+            case "pettame" -> Collections.emptyList();
             case "petstatus" -> Collections.emptyList();
             case "petadmin" -> completeAdmin(sender, args);
             case "petevolve" -> Collections.emptyList();
             case "petequip" -> Collections.emptyList();
             case "petdex" -> Collections.emptyList();
+            case "petrelease" -> Collections.emptyList();
+            case "petst" -> Collections.emptyList();
             default -> null;
         };
     }
@@ -540,7 +638,7 @@ public final class PetCommandManager implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 3 && "setbond".equals(sub)) {
-            return List.of("100", "350", "750", "1500");
+            return List.of("200", "600", "1200", "2000");
         }
 
         return Collections.emptyList();

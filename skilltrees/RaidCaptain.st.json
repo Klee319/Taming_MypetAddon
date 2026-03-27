@@ -1,0 +1,104 @@
+{
+  "Order": 40,
+  "Description": [
+    "- <red><bold>襲撃の将 (超高ダメージ)",
+    "- <blue><bold>スプリント + ノックバック",
+    "- <red><bold>鈍足",
+    "- <green><bold>HP増加"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+3"
+        },
+        "15": {
+          "Damage": "+3"
+        },
+        "30": {
+          "Damage": "+4"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "10": {
+          "Chance": "+32"
+        },
+        "35": {
+          "Chance": "+26"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "20": {
+          "Duration": "+3",
+          "Chance": "+32"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "25": {
+          "Health": "+5"
+        },
+        "42": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "50": {
+          "Reflection": "+20",
+          "Chance": "+32"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "VINDICATOR"
+  ],
+  "ID": "RaidCaptain",
+  "Icon": {
+    "Material": "iron_axe",
+    "Glowing": true
+  },
+  "Name": "レイドキャプテン"
+}

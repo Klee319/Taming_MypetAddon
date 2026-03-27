@@ -1,0 +1,106 @@
+{
+  "Order": 14,
+  "Description": [
+    "- <dark_purple><bold>虚空のエネルギー",
+    "- <blue><bold>スプリント + ノックバック",
+    "- <red><bold>高ダメージ",
+    "- <yellow><bold>ビーコン (速度)"
+  ],
+  "Skills": {
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "5": {
+          "Chance": "+26"
+        },
+        "30": {
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+2"
+        },
+        "15": {
+          "Damage": "+2"
+        },
+        "35": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "10": {
+          "Health": "+2"
+        },
+        "25": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "42": {
+          "Buffs": {
+            "Speed": "+2"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "20": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "25": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "50": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ENDERMAN",
+    "ENDERMITE"
+  ],
+  "ID": "VoidWalker",
+  "Icon": {
+    "Material": "ender_pearl",
+    "Glowing": true
+  },
+  "Name": "ヴォイドウォーカー"
+}

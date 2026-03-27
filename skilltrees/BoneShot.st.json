@@ -1,0 +1,110 @@
+{
+  "Order": 11,
+  "Description": [
+    "- <red><bold>強力遠距離攻撃",
+    "- <red><bold>鈍足 + 毒矢",
+    "- <blue><bold>スプリント",
+    "- <yellow><bold>アイテム回収"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+45",
+          "Damage": "+4",
+          "Projectile": "Arrow"
+        },
+        "15": {
+          "Rate": "+25",
+          "Damage": "+3"
+        },
+        "30": {
+          "Rate": "+20",
+          "Damage": "+3"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+3",
+          "Chance": "+20"
+        },
+        "35": {
+          "Duration": "+2",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Poison": {
+      "Upgrades": {
+        "25": {
+          "Duration": "+2",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "20": {
+          "Active": true
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "42": {
+          "Range": "+3",
+          "Exp": false
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "5": {
+          "Damage": "+1"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "5": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "30": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "SKELETON",
+    "STRAY",
+    "BOGGED",
+    "WitherSkeleton"
+  ],
+  "ID": "BoneShot",
+  "Icon": {
+    "Material": "skeleton_skull"
+  },
+  "Name": "ボーンショット"
+}

@@ -1,0 +1,114 @@
+{
+  "Order": 4,
+  "Description": [
+    "- <red><bold>近接 + 遠距離攻撃",
+    "- <yellow><bold>インベントリ",
+    "- <red><bold>トゲ + 毒",
+    "- <blue><bold>操作"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "30": {
+          "Rate": "+35",
+          "Damage": "+3",
+          "Projectile": "Arrow"
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "1": {
+          "drop": false,
+          "rows": "+1"
+        },
+        "20": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "35": {
+          "Active": true
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "5": {
+          "Range": "+1",
+          "Exp": false
+        },
+        "50": {
+          "Range": "+5",
+          "Exp": false
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "25": {
+          "Reflection": "+10",
+          "Chance": "+32"
+        }
+      }
+    },
+    "Poison": {
+      "Upgrades": {
+        "42": {
+          "Duration": "+2",
+          "Chance": "+32"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "15": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "10": {
+          "Damage": "+4"
+        },
+        "20": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "15": {
+          "Health": "+3"
+        },
+        "25": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "35": {
+          "Duration": "+2",
+          "Chance": "+16"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Farm",
+  "Icon": {
+    "Material": "writable_book"
+  },
+  "Name": "ファーム"
+}

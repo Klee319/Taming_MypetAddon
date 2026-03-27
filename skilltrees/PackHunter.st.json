@@ -1,0 +1,98 @@
+{
+  "Order": 15,
+  "Description": [
+    "- <red><bold>群れの戦術 (ダメージ)",
+    "- <blue><bold>スプリント",
+    "- <green><bold>高速回復",
+    "- <yellow><bold>騎乗"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+2"
+        },
+        "10": {
+          "Damage": "+2"
+        },
+        "25": {
+          "Damage": "+2"
+        },
+        "42": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+25",
+          "Health": "+3"
+        },
+        "35": {
+          "Health": "+2"
+        }
+      }
+    },
+    "Ride": {
+      "Upgrades": {
+        "20": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+1.25"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "30": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "50": {
+          "Range": "+3",
+          "Exp": false
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "30": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "WOLF",
+    "FOX",
+    "CAT",
+    "OCELOT"
+  ],
+  "ID": "PackHunter",
+  "Icon": {
+    "Material": "bone"
+  },
+  "Name": "パックハンター"
+}

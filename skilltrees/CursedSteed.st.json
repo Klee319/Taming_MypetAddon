@@ -1,0 +1,109 @@
+{
+  "Order": 37,
+  "Description": [
+    "- <dark_green><bold>呪われた騎馬 (不死騎乗)",
+    "- <red><bold>炎上 + トゲ",
+    "- <green><bold>不死の耐久力",
+    "- <red><bold>ダメージ"
+  ],
+  "Skills": {
+    "Ride": {
+      "Upgrades": {
+        "1": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+1.5"
+        },
+        "30": {
+          "Speed": "+3"
+        }
+      }
+    },
+    "Fire": {
+      "Upgrades": {
+        "5": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "35": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "10": {
+          "Health": "+6"
+        },
+        "25": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "15": {
+          "Reflection": "+20",
+          "Chance": "+32"
+        },
+        "42": {
+          "Reflection": "+15",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "20": {
+          "Damage": "+2"
+        },
+        "50": {
+          "Damage": "+3"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "30": {
+          "Timer": "+30",
+          "Health": "+3"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ZombieHorse"
+  ],
+  "ID": "CursedSteed",
+  "Icon": {
+    "Material": "rotten_flesh",
+    "Glowing": true
+  },
+  "Name": "カースドスティード"
+}

@@ -1,0 +1,127 @@
+{
+  "Order": 21,
+  "Description": [
+    "- <white><bold>空の騎乗 (飛行可能)",
+    "- <red><bold>火球遠距離攻撃",
+    "- <green><bold>HP大幅増加",
+    "- <yellow><bold>ビーコン (再生 + 速度)"
+  ],
+  "Skills": {
+    "Ride": {
+      "Upgrades": {
+        "1": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+2",
+          "CanFly": true
+        },
+        "20": {
+          "Speed": "+3"
+        },
+        "35": {
+          "Speed": "+2"
+        }
+      }
+    },
+    "Ranged": {
+      "Upgrades": {
+        "10": {
+          "Rate": "+40",
+          "Damage": "+4",
+          "Projectile": "LargeFireball"
+        },
+        "30": {
+          "Rate": "+25",
+          "Damage": "+3"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+6"
+        },
+        "25": {
+          "Health": "+6"
+        },
+        "42": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+30",
+          "Health": "+5"
+        },
+        "35": {
+          "Health": "+3"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "50": {
+          "Buffs": {
+            "Regeneration": "+2",
+            "Speed": "+2"
+          },
+          "Duration": "+12",
+          "Count": "+1",
+          "Range": "+12"
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "20": {
+          "drop": false,
+          "rows": "+3"
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "25": {
+          "Range": "+3",
+          "Exp": true
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "15": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "PHANTOM"
+  ],
+  "ID": "SkyRider",
+  "Icon": {
+    "Material": "elytra",
+    "Glowing": true
+  },
+  "Name": "スカイライダー"
+}

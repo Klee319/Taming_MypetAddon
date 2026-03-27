@@ -1,8 +1,12 @@
 package com.mypetaddon;
 
+import com.mypetaddon.bond.BondLevel;
 import com.mypetaddon.bond.BondListener;
 import com.mypetaddon.bond.BondManager;
 import com.mypetaddon.command.PetCommandManager;
+import com.mypetaddon.command.PetInfoListener;
+import com.mypetaddon.command.PetReleaseGUI;
+import com.mypetaddon.command.PetSkillGUI;
 import com.mypetaddon.config.ConfigManager;
 import com.mypetaddon.data.DatabaseManager;
 import com.mypetaddon.data.MigrationManager;
@@ -13,6 +17,7 @@ import com.mypetaddon.integration.LevelledMobsIntegration;
 import com.mypetaddon.integration.MythicMobsIntegration;
 import com.mypetaddon.personality.PersonalityManager;
 import com.mypetaddon.rarity.RarityManager;
+import com.mypetaddon.stats.ExpModifierListener;
 import com.mypetaddon.stats.ModifierPipeline;
 import com.mypetaddon.stats.StatsManager;
 import com.mypetaddon.encyclopedia.EncyclopediaGUI;
@@ -29,6 +34,7 @@ import com.mypetaddon.taming.TamingManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 public final class MyPetAddonPlugin extends JavaPlugin {
 
@@ -52,6 +58,9 @@ public final class MyPetAddonPlugin extends JavaPlugin {
     private EquipmentManager equipmentManager;
     private EquipmentGUI equipmentGUI;
     private SkilltreeAssigner skilltreeAssigner;
+    private PetReleaseGUI petReleaseGUI;
+    private PetSkillGUI petSkillGUI;
+    private BukkitTask cacheFlushTask;
 
     @Override
     public void onEnable() {
@@ -89,12 +98,16 @@ public final class MyPetAddonPlugin extends JavaPlugin {
         levelledMobsIntegration = new LevelledMobsIntegration(this, configManager);
         mythicMobsIntegration = new MythicMobsIntegration(this);
 
+        // 6b. Initialize config-backed static helpers
+        BondLevel.initialize(configManager);
+
         // 7. Managers
         personalityManager = new PersonalityManager(configManager);
         rarityManager = new RarityManager(configManager, levelledMobsIntegration);
         modifierPipeline = new ModifierPipeline(configManager);
         bondManager = new BondManager(this, configManager, petDataCache);
         statsManager = new StatsManager(this, configManager, petDataCache, modifierPipeline);
+        bondManager.setStatsManager(statsManager);
         skilltreeAssigner = new SkilltreeAssigner(configManager, getLogger());
         tamingManager = new TamingManager(this, configManager, rarityManager,
                 personalityManager, petDataCache, encyclopediaRepository,
@@ -107,7 +120,10 @@ public final class MyPetAddonPlugin extends JavaPlugin {
         evolutionGUI = new EvolutionGUI(this, evolutionManager, petDataCache);
         equipmentManager = new EquipmentManager(this, configManager, databaseManager);
         modifierPipeline.setEquipmentManager(equipmentManager);
+        petDataCache.setEquipmentPreloader(equipmentManager::getEquipment);
         equipmentGUI = new EquipmentGUI(this, equipmentManager, petDataCache);
+        petReleaseGUI = new PetReleaseGUI(this, petDataCache);
+        petSkillGUI = new PetSkillGUI(this);
         // 8. Event Listeners
         getServer().getPluginManager().registerEvents(statsManager, this);
         getServer().getPluginManager().registerEvents(equipmentGUI, this);
@@ -122,17 +138,25 @@ public final class MyPetAddonPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new PetInteractListener(this, configManager, petDataCache,
                         statsManager, skilltreeAssigner), this);
+        getServer().getPluginManager().registerEvents(
+                new PetInfoListener(this, petDataCache), this);
+        getServer().getPluginManager().registerEvents(petReleaseGUI, this);
+        getServer().getPluginManager().registerEvents(petSkillGUI, this);
+        ExpModifierListener expModifierListener = new ExpModifierListener(configManager);
+        getServer().getPluginManager().registerEvents(expModifierListener, this);
+        statsManager.setExpModifierListener(expModifierListener);
 
         // 9. Commands
         PetCommandManager commandManager = new PetCommandManager(this, tamingManager,
-                petDataCache, statsManager, bondManager, configManager);
+                petDataCache, statsManager, bondManager, configManager, petReleaseGUI, petSkillGUI);
         commandManager.registerCommands();
 
-        // 10. Stats application for already-active pets
+        // 10. Load exp snapshots and apply stats for already-active pets
+        statsManager.loadExpSnapshots();
         statsManager.applyAllActivePets();
 
         // 11. Cache flush scheduler (every 2 seconds)
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this,
+        cacheFlushTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this,
                 () -> petDataCache.flushDirty(), 40L, 40L);
 
         getLogger().info("MyPetAddon enabled successfully!");
@@ -140,13 +164,19 @@ public final class MyPetAddonPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Cancel async flush task before synchronous flush to prevent concurrent writes
+        if (cacheFlushTask != null) {
+            cacheFlushTask.cancel();
+        }
+
         // Flush all cached data synchronously
         if (petDataCache != null) {
             petDataCache.flushAll();
         }
 
-        // Unload all pet modifiers
+        // Save exp snapshots and unload all pet modifiers
         if (statsManager != null) {
+            statsManager.saveExpSnapshots();
             statsManager.unloadAll();
         }
 
@@ -216,4 +246,5 @@ public final class MyPetAddonPlugin extends JavaPlugin {
     public EquipmentManager getEquipmentManager() { return equipmentManager; }
     public EquipmentGUI getEquipmentGUI() { return equipmentGUI; }
     public SkilltreeAssigner getSkilltreeAssigner() { return skilltreeAssigner; }
+    public PetSkillGUI getPetSkillGUI() { return petSkillGUI; }
 }

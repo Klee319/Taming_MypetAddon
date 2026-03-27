@@ -104,27 +104,25 @@ public final class ConfigValidator {
             return;
         }
 
-        int previousMax = -1;
+        int previousThreshold = -1;
         List<String> sortedKeys = levels.getKeys(false).stream()
                 .sorted((a, b) -> Integer.compare(parseIntSafe(a), parseIntSafe(b)))
                 .toList();
 
         for (String levelKey : sortedKeys) {
-            int min = levels.getInt(levelKey + ".min", 0);
-            int max = levels.getInt(levelKey + ".max", -1);
-
-            if (previousMax >= 0 && min < previousMax) {
-                errors.add("Bond level " + levelKey + " min (" + min
-                        + ") is less than previous level max (" + previousMax
-                        + "). Levels must be ascending.");
+            int threshold = levels.getInt(levelKey + ".exp-threshold", -1);
+            if (threshold < 0) {
+                errors.add("Bond level " + levelKey + " missing or invalid exp-threshold");
+                continue;
             }
 
-            if (max != -1 && max <= min) {
-                errors.add("Bond level " + levelKey + " max (" + max
-                        + ") must be greater than min (" + min + ").");
+            if (previousThreshold >= 0 && threshold <= previousThreshold) {
+                errors.add("Bond level " + levelKey + " exp-threshold (" + threshold
+                        + ") must be greater than previous level (" + previousThreshold
+                        + "). Thresholds must be ascending.");
             }
 
-            previousMax = max;
+            previousThreshold = threshold;
         }
     }
 
@@ -137,18 +135,47 @@ public final class ConfigValidator {
             return; // Evolutions are optional
         }
 
+        // Collect all evolution targets per source type (branches structure)
         for (String fromType : evolutions.getKeys(false)) {
-            Set<String> visited = new HashSet<>();
-            String current = fromType;
-
-            while (current != null && !visited.contains(current)) {
-                visited.add(current);
-                current = evolutions.getString(current + ".target");
+            ConfigurationSection branches = evolutions.getConfigurationSection(fromType + ".branches");
+            if (branches == null) {
+                errors.add("Evolution entry '" + fromType + "' has no branches section");
+                continue;
             }
 
-            if (current != null && visited.contains(current)) {
-                errors.add("Evolution cycle detected starting from: " + fromType
-                        + " (cycle at " + current + ")");
+            for (String branchKey : branches.getKeys(false)) {
+                String target = branches.getString(branchKey + ".target");
+                if (target == null || target.isEmpty()) {
+                    errors.add("Evolution branch '" + fromType + "." + branchKey + "' has no target");
+                    continue;
+                }
+
+                // Check for cycles: follow target -> its branches -> targets...
+                Set<String> visited = new HashSet<>();
+                visited.add(fromType);
+                String current = target;
+
+                while (current != null && !visited.contains(current)) {
+                    visited.add(current);
+                    // Find if this target has its own evolution
+                    ConfigurationSection nextBranches =
+                            evolutions.getConfigurationSection(current + ".branches");
+                    if (nextBranches == null) {
+                        current = null;
+                    } else {
+                        // Check all branches of the next target for cycles
+                        current = null;
+                        for (String nextBranchKey : nextBranches.getKeys(false)) {
+                            String nextTarget = nextBranches.getString(nextBranchKey + ".target");
+                            if (nextTarget != null && visited.contains(nextTarget)) {
+                                errors.add("Evolution cycle detected: " + fromType
+                                        + " -> " + target + " ... -> " + nextTarget);
+                            } else if (nextTarget != null && current == null) {
+                                current = nextTarget; // Follow first chain
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -173,14 +200,19 @@ public final class ConfigValidator {
             }
         }
 
-        // Also validate evolution mob types
+        // Also validate evolution mob types (branches structure)
         ConfigurationSection evolutions = config.getConfigurationSection("evolutions");
         if (evolutions != null) {
             for (String fromType : evolutions.getKeys(false)) {
                 validateEntityTypeName(fromType, "evolutions (from)", errors);
-                String toType = evolutions.getString(fromType + ".target");
-                if (toType != null) {
-                    validateEntityTypeName(toType, "evolutions (to)", errors);
+                ConfigurationSection branches = evolutions.getConfigurationSection(fromType + ".branches");
+                if (branches != null) {
+                    for (String branchKey : branches.getKeys(false)) {
+                        String toType = branches.getString(branchKey + ".target");
+                        if (toType != null) {
+                            validateEntityTypeName(toType, "evolutions." + fromType + ".branches." + branchKey, errors);
+                        }
+                    }
                 }
             }
         }

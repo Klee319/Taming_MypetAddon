@@ -13,51 +13,51 @@ import java.util.Random;
 public enum Personality {
 
     BRAVE(
-            "Brave", "Fearless in battle, boosting damage dealt.",
+            "勇敢", "戦闘で恐れを知らず、攻撃力が上昇する",
             20,
-            Map.of("damage", 1.10, "health", 0.95),
+            Map.of("Damage", 1.10, "Life", 0.95),
             Map.of("aggroRange", 1.2)
     ),
     STURDY(
-            "Sturdy", "Tough and resilient, absorbing more damage.",
+            "頑強", "タフで打たれ強く、ダメージを吸収する",
             20,
-            Map.of("health", 1.15, "damage", 0.95),
+            Map.of("Life", 1.15, "Damage", 0.95),
             Map.of("knockbackResist", 1.3)
     ),
     AGILE(
-            "Agile", "Quick on its feet, dodging attacks with ease.",
+            "俊敏", "素早い身のこなしで攻撃を回避する",
             18,
-            Map.of("speed", 1.15, "health", 0.90),
+            Map.of("Speed", 1.15, "Life", 0.90),
             Map.of("dodgeChance", 0.08)
     ),
     LOYAL(
-            "Loyal", "Deeply bonded, earning trust faster.",
+            "忠誠", "深い絆を持ち、信頼を早く獲得する",
             18,
-            Map.of("health", 1.05),
+            Map.of("Life", 1.05),
             Map.of("bondExpMultiplier", 1.25)
     ),
     FIERCE(
-            "Fierce", "Unleashes devastating critical strikes.",
+            "獰猛", "壊滅的なクリティカルストライクを放つ",
             12,
-            Map.of("damage", 1.20, "health", 0.90, "speed", 0.95),
+            Map.of("Damage", 1.20, "Life", 0.90, "Speed", 0.95),
             Map.of("critChance", 0.10)
     ),
     CAUTIOUS(
-            "Cautious", "Alert and careful, rarely caught off guard.",
+            "慎重", "注意深く、不意を突かれることが少ない",
             12,
-            Map.of("health", 1.10, "speed", 1.05, "damage", 0.90),
+            Map.of("Life", 1.10, "Speed", 1.05, "Damage", 0.90),
             Map.of("threatDetectRange", 1.5)
     ),
     LUCKY(
-            "Lucky", "Fortune favors this companion.",
+            "幸運", "幸運に恵まれた仲間",
             5,
             Map.of(),
             Map.of("lootBonusChance", 0.15, "rareDropMultiplier", 1.3)
     ),
     GENIUS(
-            "Genius", "Brilliant mind, mastering skills rapidly.",
+            "天才", "明晰な頭脳でスキルを素早く習得する",
             5,
-            Map.of("damage", 1.05),
+            Map.of("Damage", 1.05),
             Map.of("skillExpMultiplier", 1.30, "skillCooldownReduction", 0.10)
     );
 
@@ -113,7 +113,7 @@ public enum Personality {
      * Gets the modifier value for a given stat name, returning
      * the default value if no modifier is defined.
      *
-     * @param statName     the stat to look up (e.g. "damage", "health")
+     * @param statName     the stat to look up (e.g. "Life", "Damage", "Speed")
      * @param defaultValue the fallback value if not present
      * @return the modifier value
      */

@@ -1,0 +1,106 @@
+{
+  "Order": 6,
+  "Description": [
+    "- <red><bold>高ダメージ",
+    "- <blue><bold>スプリント",
+    "- <red><bold>発火 + 毒",
+    "- <blue><bold>ノックバック"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+5"
+        },
+        "10": {
+          "Damage": "+5"
+        },
+        "25": {
+          "Damage": "+5"
+        },
+        "42": {
+          "Damage": "+3"
+        }
+      }
+    },
+    "Fire": {
+      "Upgrades": {
+        "5": {
+          "Duration": "+3",
+          "Chance": "+32"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "15": {
+          "Active": true
+        }
+      }
+    },
+    "Poison": {
+      "Upgrades": {
+        "20": {
+          "Duration": "+2",
+          "Chance": "+24"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "20": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "35": {
+          "Chance": "+32"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "30": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "50": {
+          "Active": true
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "35": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Assassin",
+  "Icon": {
+    "Material": "iron_sword",
+    "Glowing": true
+  },
+  "Name": "アサシン"
+}

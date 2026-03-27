@@ -21,7 +21,8 @@ public record PetData(
         int bondExp,
         int originalLmLevel,
         long createdAt,
-        @Nullable UUID evolvedFrom
+        @Nullable UUID evolvedFrom,
+        double capturedScale
 ) {
 
     /**
@@ -30,7 +31,7 @@ public record PetData(
     @NotNull
     public PetData withBond(int newBondLevel, int newBondExp) {
         return new PetData(addonPetId, mypetUuid, ownerUuid, mobType, rarity,
-                personality, newBondLevel, newBondExp, originalLmLevel, createdAt, evolvedFrom);
+                personality, newBondLevel, newBondExp, originalLmLevel, createdAt, evolvedFrom, capturedScale);
     }
 
     /**
@@ -39,7 +40,7 @@ public record PetData(
     @NotNull
     public PetData withMypetUuid(@NotNull UUID newMypetUuid) {
         return new PetData(addonPetId, newMypetUuid, ownerUuid, mobType, rarity,
-                personality, bondLevel, bondExp, originalLmLevel, createdAt, evolvedFrom);
+                personality, bondLevel, bondExp, originalLmLevel, createdAt, evolvedFrom, capturedScale);
     }
 
     /**
@@ -48,6 +49,15 @@ public record PetData(
     @NotNull
     public PetData withMobType(@NotNull String newMobType) {
         return new PetData(addonPetId, mypetUuid, ownerUuid, newMobType, rarity,
-                personality, bondLevel, bondExp, originalLmLevel, createdAt, evolvedFrom);
+                personality, bondLevel, bondExp, originalLmLevel, createdAt, evolvedFrom, capturedScale);
+    }
+
+    /**
+     * Returns a copy with a new rarity (e.g. after rarity upgrade).
+     */
+    @NotNull
+    public PetData withRarity(@NotNull Rarity newRarity) {
+        return new PetData(addonPetId, mypetUuid, ownerUuid, mobType, newRarity,
+                personality, bondLevel, bondExp, originalLmLevel, createdAt, evolvedFrom, capturedScale);
     }
 }

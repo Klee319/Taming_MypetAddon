@@ -1,0 +1,102 @@
+{
+  "Order": 1,
+  "Description": [
+    "- <yellow><bold>大容量インベントリ",
+    "- <green><bold>HP増加",
+    "- <yellow><bold>アイテム回収",
+    "- <red><bold>毒"
+  ],
+  "Skills": {
+    "Backpack": {
+      "Upgrades": {
+        "1": {
+          "drop": true,
+          "rows": "+1"
+        },
+        "10": {
+          "drop": false,
+          "rows": "+1"
+        },
+        "20": {
+          "drop": false,
+          "rows": "+1"
+        },
+        "30": {
+          "drop": false,
+          "rows": "+1"
+        },
+        "50": {
+          "drop": false,
+          "rows": "+2"
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "25": {
+          "Range": "+1",
+          "Exp": false
+        },
+        "42": {
+          "Range": "+1",
+          "Exp": false
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+4"
+        },
+        "20": {
+          "Health": "+7"
+        },
+        "35": {
+          "Health": "+9"
+        }
+      }
+    },
+    "Poison": {
+      "Upgrades": {
+        "15": {
+          "Duration": "+3",
+          "Chance": "+24"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "5": {
+          "Timer": "+45",
+          "Health": "+3"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "15": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "15": {
+          "Damage": "+4"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Utility",
+  "Icon": {
+    "Material": "trapped_chest"
+  },
+  "Name": "ユーティリティ"
+}

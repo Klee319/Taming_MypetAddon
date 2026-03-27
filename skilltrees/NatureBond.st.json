@@ -1,0 +1,139 @@
+{
+  "Order": 18,
+  "Description": [
+    "- <green><bold>自然の絆 (回復 + ビーコン)",
+    "- <yellow><bold>アイテム回収 + 大容量インベントリ",
+    "- <blue><bold>スプリント + 騎乗",
+    "- <red><bold>毒攻撃"
+  ],
+  "Skills": {
+    "Heal": {
+      "Upgrades": {
+        "1": {
+          "Timer": "+25",
+          "Health": "+3"
+        },
+        "20": {
+          "Timer": "+15",
+          "Health": "+3"
+        },
+        "42": {
+          "Health": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+2"
+        },
+        "25": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "10": {
+          "Range": "+2",
+          "Exp": false
+        },
+        "30": {
+          "Range": "+2",
+          "Exp": true
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "15": {
+          "drop": false,
+          "rows": "+2"
+        },
+        "35": {
+          "drop": false,
+          "rows": "+2"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "25": {
+          "Buffs": {
+            "Regeneration": "+1",
+            "Luck": "+1"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        },
+        "50": {
+          "Buffs": {
+            "Regeneration": "+1",
+            "Luck": "+1",
+            "Speed": "+1"
+          },
+          "Duration": "+5",
+          "Count": "+1",
+          "Range": "+5"
+        }
+      }
+    },
+    "Poison": {
+      "Upgrades": {
+        "20": {
+          "Duration": "+3",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    },
+    "Ride": {
+      "Upgrades": {
+        "35": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+1.25",
+          "CanFly": true
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ALLAY",
+    "BEE",
+    "DOLPHIN",
+    "AXOLOTL",
+    "MOOSHROOM"
+  ],
+  "ID": "NatureBond",
+  "Icon": {
+    "Material": "honeycomb",
+    "Glowing": true
+  },
+  "Name": "ネイチャーボンド"
+}

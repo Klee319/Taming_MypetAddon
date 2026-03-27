@@ -6,6 +6,7 @@ import com.mypetaddon.config.ConfigManager.RerollItemEntry;
 import com.mypetaddon.data.PetData;
 import com.mypetaddon.data.PetStats;
 import com.mypetaddon.data.cache.PetDataCache;
+import com.mypetaddon.rarity.Rarity;
 import com.mypetaddon.stats.StatsManager;
 import com.mypetaddon.util.ItemMatcher;
 import de.Keyle.MyPet.api.entity.MyPet;
@@ -108,7 +109,7 @@ public final class PetInteractListener implements Listener {
         switch (matched.type()) {
             case "skilltree" -> handleSkilltreeReroll(player, myPet, petData);
             case "reroll" -> handleStatReroll(player, myPet, petData);
-            case "upgrade" -> handleStatReroll(player, myPet, petData); // Same action, different item
+            case "upgrade" -> handleRarityUpgrade(player, myPet, petData);
             case "stat-add" -> handleStatAdd(player, myPet, petData);
             default -> player.sendMessage("§c不明なリロールタイプ: " + matched.type());
         }
@@ -137,11 +138,42 @@ public final class PetInteractListener implements Listener {
     private void handleStatReroll(@NotNull Player player,
                                   @NotNull MyPet myPet,
                                   @NotNull PetData petData) {
-        PetStats newStats = statsManager.createBaseStats(petData);
+        // Preserve existing upgradedValues (evolution bonuses, stat-add enhancements)
+        PetStats existingStats = petDataCache.getStats(petData.addonPetId());
+        PetStats rerolled = statsManager.createBaseStats(petData);
+        PetStats newStats = existingStats != null
+                ? new PetStats(rerolled.addonPetId(), rerolled.baseValues(), existingStats.upgradedValues())
+                : rerolled;
         petDataCache.put(petData, newStats);
         statsManager.applyStats(myPet);
 
         player.sendMessage("§e基礎ステータスが再抽選されました！");
+        playSuccessEffect(player);
+    }
+
+    /**
+     * Upgrades the pet's rarity by one tier.
+     */
+    private void handleRarityUpgrade(@NotNull Player player,
+                                      @NotNull MyPet myPet,
+                                      @NotNull PetData petData) {
+        Rarity current = petData.rarity();
+        Rarity upgraded = current.upgrade();
+
+        if (upgraded == current) {
+            player.sendMessage("§c既に最高レアリティです！");
+            return;
+        }
+
+        PetData updatedData = petData.withRarity(upgraded);
+        PetStats existingStats = petDataCache.getStats(petData.addonPetId());
+        if (existingStats != null) {
+            petDataCache.put(updatedData, existingStats);
+        }
+        statsManager.applyStats(myPet);
+
+        player.sendMessage("§6レアリティが " + current.getColoredName()
+                + " §6から " + upgraded.getColoredName() + " §6にアップグレードしました！");
         playSuccessEffect(player);
     }
 

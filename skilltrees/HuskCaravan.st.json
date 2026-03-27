@@ -1,0 +1,114 @@
+{
+  "Order": 39,
+  "Description": [
+    "- <yellow><bold>砂漠の隊商 (大容量騎乗)",
+    "- <green><bold>不死の耐久力",
+    "- <yellow><bold>超大容量インベントリ",
+    "- <yellow><bold>アイテム回収"
+  ],
+  "Skills": {
+    "Ride": {
+      "Upgrades": {
+        "1": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+1.0"
+        },
+        "25": {
+          "Speed": "+3"
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "5": {
+          "drop": false,
+          "rows": "+3"
+        },
+        "20": {
+          "drop": false,
+          "rows": "+2"
+        },
+        "35": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "10": {
+          "Health": "+6"
+        },
+        "30": {
+          "Health": "+6"
+        },
+        "50": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+30",
+          "Health": "+5"
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "20": {
+          "Range": "+3",
+          "Exp": false
+        },
+        "42": {
+          "Range": "+2",
+          "Exp": true
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "35": {
+          "Reflection": "+20",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "CAMEL",
+    "HUSK"
+  ],
+  "ID": "HuskCaravan",
+  "Icon": {
+    "Material": "chest_minecart"
+  },
+  "Name": "ハスクキャラバン"
+}

@@ -1,6 +1,7 @@
 package com.mypetaddon.equipment;
 
 import com.mypetaddon.MyPetAddonPlugin;
+import com.mypetaddon.config.ConfigManager;
 import com.mypetaddon.data.PetData;
 import com.mypetaddon.data.cache.PetDataCache;
 import org.bukkit.Bukkit;
@@ -38,9 +39,9 @@ public final class EquipmentGUI implements Listener {
     private static final int SLOT_ACCESSORY = 16;
     private static final int SLOT_CLOSE = 22;
 
-    /** Maps GUI inventory slot index to equipment slot name. */
+    /** Maps GUI inventory slot index to equipment slot name (must match EquipmentManager.VALID_SLOTS). */
     private static final Map<Integer, String> SLOT_MAP = Map.of(
-            SLOT_HELMET, "HELMET",
+            SLOT_HELMET, "HEAD",
             SLOT_CHEST, "CHEST",
             SLOT_ACCESSORY, "ACCESSORY"
     );
@@ -58,6 +59,7 @@ public final class EquipmentGUI implements Listener {
      */
     private record EquipmentSession(
             @NotNull UUID addonPetId,
+            int bondLevel,
             @NotNull Inventory inventory,
             @NotNull Map<String, ItemStack> originalEquipment
     ) {}
@@ -81,6 +83,8 @@ public final class EquipmentGUI implements Listener {
      */
     public void openEquipmentGUI(@NotNull Player player, @NotNull PetData petData) {
         Inventory gui = Bukkit.createInventory(null, SIZE, GUI_TITLE);
+        ConfigManager cfg = plugin.getConfigManager();
+        int bondLevel = petData.bondLevel();
 
         // Fill border with black stained glass panes
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -91,30 +95,28 @@ public final class EquipmentGUI implements Listener {
         // Load current equipment from DB (async caller should have ensured data is ready)
         Map<String, ItemStack> equipped = equipmentManager.getEquipment(petData.addonPetId());
 
-        // HELMET slot (10)
-        gui.setItem(SLOT_HELMET, equipped.containsKey("HELMET")
-                ? equipped.get("HELMET")
-                : createPlaceholder(Material.GRAY_STAINED_GLASS_PANE, "\u00a77\u30d8\u30eb\u30e1\u30c3\u30c8\u30b9\u30ed\u30c3\u30c8",
-                        "\u00a78\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u88c5\u5099"));
+        // Set each equipment slot (or locked/placeholder)
+        for (Map.Entry<Integer, String> entry : SLOT_MAP.entrySet()) {
+            int guiSlot = entry.getKey();
+            String slotName = entry.getValue();
+            int required = cfg.getEquipmentSlotRequiredBondLevel(slotName);
 
-        // CHEST slot (13)
-        gui.setItem(SLOT_CHEST, equipped.containsKey("CHEST")
-                ? equipped.get("CHEST")
-                : createPlaceholder(Material.GRAY_STAINED_GLASS_PANE, "\u00a77\u30c1\u30a7\u30b9\u30c8\u30b9\u30ed\u30c3\u30c8",
-                        "\u00a78\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u88c5\u5099"));
-
-        // ACCESSORY slot (16)
-        gui.setItem(SLOT_ACCESSORY, equipped.containsKey("ACCESSORY")
-                ? equipped.get("ACCESSORY")
-                : createPlaceholder(Material.GRAY_STAINED_GLASS_PANE, "\u00a77\u30a2\u30af\u30bb\u30b5\u30ea\u30fc\u30b9\u30ed\u30c3\u30c8",
-                        "\u00a78\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u88c5\u5099"));
+            if (bondLevel < required) {
+                // Locked slot
+                gui.setItem(guiSlot, createLockedPlaceholder(slotName, required));
+            } else if (equipped.containsKey(slotName)) {
+                gui.setItem(guiSlot, equipped.get(slotName));
+            } else {
+                gui.setItem(guiSlot, createPlaceholderForSlot(slotName));
+            }
+        }
 
         // Close button (22)
         gui.setItem(SLOT_CLOSE, createItem(Material.BARRIER, "\u00a7c\u00a7l\u9589\u3058\u308b"));
 
         // Store session
         activeSessions.put(player.getUniqueId(),
-                new EquipmentSession(petData.addonPetId(), gui, Map.copyOf(equipped)));
+                new EquipmentSession(petData.addonPetId(), bondLevel, gui, Map.copyOf(equipped)));
 
         player.openInventory(gui);
     }
@@ -137,13 +139,19 @@ public final class EquipmentGUI implements Listener {
             return;
         }
 
-        // Cancel ALL clicks (both top and bottom inventory) to prevent item duplication
-        event.setCancelled(true);
-
         int rawSlot = event.getRawSlot();
 
-        // Ignore clicks outside the GUI top inventory (bottom inventory clicks are cancelled but not processed)
-        if (rawSlot < 0 || rawSlot >= SIZE) {
+        // Allow normal interaction with the player's own inventory (bottom)
+        // so they can pick up items onto the cursor for equipping
+        if (rawSlot >= SIZE) {
+            return;
+        }
+
+        // Cancel clicks in the GUI (top inventory) to prevent direct item manipulation
+        event.setCancelled(true);
+
+        // Ignore clicks outside valid range
+        if (rawSlot < 0) {
             return;
         }
 
@@ -188,7 +196,7 @@ public final class EquipmentGUI implements Listener {
         Map<String, ItemStack> currentItems = new java.util.LinkedHashMap<>();
         for (Map.Entry<Integer, String> entry : SLOT_MAP.entrySet()) {
             ItemStack guiItem = gui.getItem(entry.getKey());
-            if (guiItem != null && !isPlaceholder(guiItem) && !isBorder(guiItem)) {
+            if (guiItem != null && !isPlaceholder(guiItem) && !isBorder(guiItem) && !isLocked(guiItem)) {
                 currentItems.put(entry.getValue(), guiItem.clone());
             }
         }
@@ -229,11 +237,19 @@ public final class EquipmentGUI implements Listener {
                                            @NotNull EquipmentSession session,
                                            int guiSlot,
                                            @NotNull String slotName) {
+        // Check bond level requirement
+        int required = plugin.getConfigManager().getEquipmentSlotRequiredBondLevel(slotName);
+        if (session.bondLevel() < required) {
+            player.sendMessage("\u00a7c\u00a7l\u203c \u00a7c\u89aa\u5bc6\u5ea6Lv." + required
+                    + " \u304c\u5fc5\u8981\u3067\u3059\u3002");
+            return;
+        }
+
         Inventory gui = session.inventory();
         ItemStack slotItem = gui.getItem(guiSlot);
         ItemStack cursorItem = player.getItemOnCursor();
 
-        boolean slotIsEmpty = slotItem == null || isPlaceholder(slotItem) || isBorder(slotItem);
+        boolean slotIsEmpty = slotItem == null || isPlaceholder(slotItem) || isBorder(slotItem) || isLocked(slotItem);
         boolean hasCursor = cursorItem != null && cursorItem.getType() != Material.AIR;
 
         if (!slotIsEmpty && !hasCursor) {
@@ -249,11 +265,6 @@ public final class EquipmentGUI implements Listener {
                     player.getWorld().dropItemNaturally(player.getLocation(), dropped);
                 }
             }
-
-            // Async DB removal
-            UUID addonPetId = session.addonPetId();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-                    equipmentManager.unequipItem(addonPetId, slotName));
 
             player.sendMessage("\u00a77\u88c5\u5099\u3092\u5916\u3057\u307e\u3057\u305f\u3002");
 
@@ -272,12 +283,6 @@ public final class EquipmentGUI implements Listener {
             } else {
                 player.setItemOnCursor(null);
             }
-
-            // Async DB save
-            UUID addonPetId = session.addonPetId();
-            ItemStack saveItem = toEquip.clone();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-                    equipmentManager.equipItem(addonPetId, slotName, saveItem));
 
             player.sendMessage("\u00a7a\u88c5\u5099\u3057\u307e\u3057\u305f\uff01");
 
@@ -302,12 +307,6 @@ public final class EquipmentGUI implements Listener {
             } else {
                 player.setItemOnCursor(null);
             }
-
-            // Async DB save (overwrite)
-            UUID addonPetId = session.addonPetId();
-            ItemStack saveItem = toEquip.clone();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-                    equipmentManager.equipItem(addonPetId, slotName, saveItem));
 
             player.sendMessage("\u00a7a\u88c5\u5099\u3092\u5165\u308c\u66ff\u3048\u307e\u3057\u305f\uff01");
         }
@@ -352,13 +351,54 @@ public final class EquipmentGUI implements Listener {
     @NotNull
     private ItemStack createPlaceholderForSlot(@NotNull String slotName) {
         String displayName = switch (slotName) {
-            case "HELMET" -> "\u00a77\u30d8\u30eb\u30e1\u30c3\u30c8\u30b9\u30ed\u30c3\u30c8";
+            case "HEAD" -> "\u00a77\u30d8\u30eb\u30e1\u30c3\u30c8\u30b9\u30ed\u30c3\u30c8";
             case "CHEST" -> "\u00a77\u30c1\u30a7\u30b9\u30c8\u30b9\u30ed\u30c3\u30c8";
             case "ACCESSORY" -> "\u00a77\u30a2\u30af\u30bb\u30b5\u30ea\u30fc\u30b9\u30ed\u30c3\u30c8";
             default -> "\u00a77\u30b9\u30ed\u30c3\u30c8";
         };
         return createPlaceholder(Material.GRAY_STAINED_GLASS_PANE, displayName,
                 "\u00a78\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u88c5\u5099");
+    }
+
+    /**
+     * Creates a locked slot indicator showing the required bond level.
+     */
+    @NotNull
+    private ItemStack createLockedPlaceholder(@NotNull String slotName, int requiredLevel) {
+        String displayName = switch (slotName) {
+            case "HEAD" -> "\u00a77\u30d8\u30eb\u30e1\u30c3\u30c8\u30b9\u30ed\u30c3\u30c8";
+            case "CHEST" -> "\u00a77\u30c1\u30a7\u30b9\u30c8\u30b9\u30ed\u30c3\u30c8";
+            case "ACCESSORY" -> "\u00a77\u30a2\u30af\u30bb\u30b5\u30ea\u30fc\u30b9\u30ed\u30c3\u30c8";
+            default -> "\u00a77\u30b9\u30ed\u30c3\u30c8";
+        };
+        String bondLabel = switch (requiredLevel) {
+            case 1 -> "\u521d\u5bfe\u9762";
+            case 2 -> "\u77e5\u4eba";
+            case 3 -> "\u4ef2\u9593";
+            case 4 -> "\u4fe1\u983c";
+            case 5 -> "\u9b42\u306e\u7d46";
+            default -> "Lv." + requiredLevel;
+        };
+        ItemStack item = new ItemStack(Material.RED_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("\u00a7c\u00a7l\ud83d\udd12 " + displayName);
+            meta.setLore(List.of(
+                    "\u00a7c\u30ed\u30c3\u30af\u4e2d",
+                    "",
+                    "\u00a77\u89e3\u653e\u6761\u4ef6: \u00a7e\u89aa\u5bc6\u5ea6 " + bondLabel
+                            + " \u00a77(Lv." + requiredLevel + ")"
+            ));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    /**
+     * Checks if an ItemStack is a locked placeholder (red stained glass pane).
+     */
+    private boolean isLocked(@NotNull ItemStack item) {
+        return item.getType() == Material.RED_STAINED_GLASS_PANE;
     }
 
     /**

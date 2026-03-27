@@ -1,0 +1,108 @@
+{
+  "Order": 35,
+  "Description": [
+    "- <yellow><bold>砂漠の射手 (弱体矢 + 炎上)",
+    "- <red><bold>遠距離攻撃",
+    "- <red><bold>鈍足 + 炎上",
+    "- <blue><bold>スプリント + 騎乗"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+40",
+          "Damage": "+2",
+          "Projectile": "Arrow"
+        },
+        "20": {
+          "Rate": "+25",
+          "Damage": "+2"
+        },
+        "42": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "5": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "30": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Fire": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "35": {
+          "Duration": "+2",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "15": {
+          "Active": true
+        }
+      }
+    },
+    "Ride": {
+      "Upgrades": {
+        "25": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+1.25"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "20": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "HUSK"
+  ],
+  "ID": "DesertShot",
+  "Icon": {
+    "Material": "dead_bush",
+    "Glowing": true
+  },
+  "Name": "デザートショット"
+}

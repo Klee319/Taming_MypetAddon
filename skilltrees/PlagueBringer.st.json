@@ -1,0 +1,112 @@
+{
+  "Order": 32,
+  "Description": [
+    "- <dark_green><bold>疫病の使い (毒 + 鈍足)",
+    "- <yellow><bold>ビーコン (再生 + 耐性)",
+    "- <green><bold>回復 + HP増加",
+    "- <yellow><bold>大容量インベントリ"
+  ],
+  "Skills": {
+    "Poison": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "25": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+3",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+4"
+        },
+        "30": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+25",
+          "Health": "+3"
+        },
+        "35": {
+          "Health": "+3"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "42": {
+          "Buffs": {
+            "Regeneration": "+2",
+            "Resistance": "+1"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "20": {
+          "drop": false,
+          "rows": "+3"
+        },
+        "50": {
+          "drop": false,
+          "rows": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "5": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "25": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "20": {
+          "Range": "+3",
+          "Exp": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ZombieVillager"
+  ],
+  "ID": "PlagueBringer",
+  "Icon": {
+    "Material": "splash_potion",
+    "Glowing": true
+  },
+  "Name": "プレイグブリンガー"
+}

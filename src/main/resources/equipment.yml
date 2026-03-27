@@ -1,0 +1,139 @@
+# ============================================================================
+#  MyPetAddon - 装備設定
+#  装備スロット、解放条件、デフォルト装備効果を定義します。
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+
+equipment:
+  # 利用可能な装備スロット
+  slots:
+    - "HEAD"
+    - "CHEST"
+    - "ACCESSORY"
+
+  # ステータスのみ適用 (true = 見た目は変更しない)
+  stat-only: true
+
+  # --- スロット解放条件 (親密度レベル) ---
+  # 親密度レベルが条件未満の場合、そのスロットはロックされる
+  slot-unlock:
+    HEAD: 1        # 初対面から使用可能
+    CHEST: 3       # 仲間 (Lv.3) で解放
+    ACCESSORY: 4   # 信頼 (Lv.4) で解放
+
+  # --- デフォルト装備効果 ---
+  # アイテムにPDCタグがない場合、素材名から自動でステータスボーナスを付与
+  # 各スロットごとにアイテム素材 → ステータスボーナスを定義
+  default-effects:
+    HEAD:
+      LEATHER_HELMET:
+        Life: 2.0
+      CHAINMAIL_HELMET:
+        Life: 4.0
+      IRON_HELMET:
+        Life: 6.0
+      DIAMOND_HELMET:
+        Life: 10.0
+      NETHERITE_HELMET:
+        Life: 15.0
+      GOLDEN_HELMET:
+        Life: 5.0
+        Speed: 0.5
+      TURTLE_HELMET:
+        Life: 10.0
+    CHEST:
+      LEATHER_CHESTPLATE:
+        Life: 3.0
+      CHAINMAIL_CHESTPLATE:
+        Life: 5.0
+      IRON_CHESTPLATE:
+        Life: 8.0
+      DIAMOND_CHESTPLATE:
+        Life: 14.0
+        Damage: 1.0
+      NETHERITE_CHESTPLATE:
+        Life: 20.0
+        Damage: 2.0
+      GOLDEN_CHESTPLATE:
+        Life: 7.0
+        Speed: 1.0
+      ELYTRA:
+        Speed: 3.0
+    ACCESSORY:
+      # --- SSR級チャーム ---
+      NETHER_STAR:
+        Life: 5.0
+        Damage: 5.0
+        Speed: 1.0
+      ENCHANTED_GOLDEN_APPLE:
+        Life: 20.0
+        Damage: 3.0
+        Speed: 1.5
+      HEART_OF_THE_SEA:
+        Life: 15.0
+      TOTEM_OF_UNDYING:
+        Life: 10.0
+        Damage: 2.0
+      DRAGON_BREATH:
+        Damage: 6.0
+        Speed: 1.0
+      HEAVY_CORE:
+        Life: 18.0
+        Damage: 4.0
+      # --- SR級チャーム ---
+      ECHO_SHARD:
+        Damage: 4.0
+        Speed: 0.5
+      ENDER_EYE:
+        Damage: 3.0
+        Speed: 0.8
+      GOLDEN_APPLE:
+        Life: 8.0
+      GHAST_TEAR:
+        Life: 8.0
+        Speed: 0.5
+      BREEZE_ROD:
+        Speed: 1.5
+        Damage: 2.0
+      OMINOUS_TRIAL_KEY:
+        Damage: 5.0
+        Life: 3.0
+      # --- R級チャーム ---
+      DIAMOND:
+        Damage: 3.0
+      EMERALD:
+        Life: 3.0
+        Damage: 1.0
+      AMETHYST_SHARD:
+        Life: 2.0
+        Speed: 0.5
+      BLAZE_ROD:
+        Damage: 3.5
+      ENDER_PEARL:
+        Speed: 1.0
+      TRIAL_KEY:
+        Damage: 2.5
+        Life: 2.0
+      PRISMARINE_CRYSTALS:
+        Life: 4.0
+      # --- N級チャーム ---
+      LAPIS_LAZULI:
+        Life: 2.0
+      REDSTONE:
+        Speed: 0.3
+      PRISMARINE_SHARD:
+        Life: 1.5
+        Speed: 0.2
+      QUARTZ:
+        Damage: 1.5
+      COPPER_INGOT:
+        Life: 1.0
+        Damage: 0.5
+      GOLD_INGOT:
+        Life: 1.5
+        Damage: 1.0
+      CLOCK:
+        Speed: 0.5
+      COMPASS:
+        Speed: 0.4
+        Life: 1.0

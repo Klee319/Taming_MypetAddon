@@ -1,0 +1,151 @@
+{
+  "Order": 51,
+  "Description": [
+    "- <dark_aqua><bold>深淵の番人 (超高ダメージ + 振動感知)",
+    "- <green><bold>不滅の体力 (最大HP)",
+    "- <red><bold>震動の鎧 (超トゲ + ノックバック)",
+    "- <yellow><bold>暗闇のビーコン (力 + 耐性 + 速度)"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+5"
+        },
+        "10": {
+          "Damage": "+5"
+        },
+        "20": {
+          "Damage": "+5"
+        },
+        "30": {
+          "Damage": "+5"
+        },
+        "50": {
+          "Damage": "+5"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "1": {
+          "Health": "+12"
+        },
+        "15": {
+          "Health": "+12"
+        },
+        "30": {
+          "Health": "+12"
+        },
+        "50": {
+          "Health": "+12"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "5": {
+          "Reflection": "+30",
+          "Chance": "+46"
+        },
+        "25": {
+          "Reflection": "+25",
+          "Chance": "+26"
+        },
+        "42": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "10": {
+          "Chance": "+46"
+        },
+        "35": {
+          "Chance": "+26"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+20",
+          "Health": "+7"
+        },
+        "35": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "20": {
+          "Duration": "+5",
+          "Chance": "+46"
+        },
+        "42": {
+          "Duration": "+3",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "25": {
+          "Buffs": {
+            "Strength": "+2",
+            "Resistance": "+1"
+          },
+          "Duration": "+12",
+          "Count": "+1",
+          "Range": "+10"
+        },
+        "50": {
+          "Buffs": {
+            "Speed": "+2",
+            "Regeneration": "+1"
+          },
+          "Duration": "+8",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "20": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "WARDEN"
+  ],
+  "ID": "AbyssWarden",
+  "Icon": {
+    "Material": "sculk_shrieker",
+    "Glowing": true
+  },
+  "Name": "アビスウォーデン"
+}

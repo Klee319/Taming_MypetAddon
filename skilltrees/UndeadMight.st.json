@@ -1,0 +1,107 @@
+{
+  "Order": 10,
+  "Description": [
+    "- <dark_green><bold>不死の耐久力",
+    "- <green><bold>HP大量増加",
+    "- <red><bold>トゲ + ノックバック",
+    "- <green><bold>回復"
+  ],
+  "Skills": {
+    "Life": {
+      "Upgrades": {
+        "1": {
+          "Health": "+4"
+        },
+        "10": {
+          "Health": "+4"
+        },
+        "25": {
+          "Health": "+5"
+        },
+        "42": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "5": {
+          "Reflection": "+15",
+          "Chance": "+26"
+        },
+        "30": {
+          "Reflection": "+15",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "15": {
+          "Chance": "+20"
+        },
+        "35": {
+          "Chance": "+15"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "20": {
+          "Timer": "+50",
+          "Health": "+5"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "10": {
+          "Damage": "+2"
+        },
+        "30": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "50": {
+          "Duration": "+3",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "5": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "25": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ZOMBIE",
+    "HUSK",
+    "DROWNED",
+    "ZombieVillager",
+    "ZombifiedPiglin",
+    "ZOGLIN"
+  ],
+  "ID": "UndeadMight",
+  "Icon": {
+    "Material": "zombie_head"
+  },
+  "Name": "アンデッドマイト"
+}

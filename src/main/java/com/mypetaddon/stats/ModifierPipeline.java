@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  *   <li>Equipment bonus (additive)</li>
  * </ol>
  *
- * Formula: result = (base * rarityMul * personalityMul) + bondBonus + equipBonus
+ * Formula: result = (base * rarityMul * personalityMul) * (1 + bondBonus) + equipBonus
  */
 public final class ModifierPipeline {
 
@@ -39,15 +39,27 @@ public final class ModifierPipeline {
 
     /**
      * Calculates the final value for a single stat after applying all modifiers.
-     *
-     * @param statName the stat identifier (e.g. "damage", "health", "speed")
-     * @param petData  the pet's core data (rarity, personality, bond level)
-     * @param petStats the pet's base and upgraded stat values
-     * @return the final calculated stat value
+     * Overload without pet level (no level bonus applied).
      */
     public double calculate(@NotNull String statName,
                             @NotNull PetData petData,
                             @NotNull PetStats petStats) {
+        return calculate(statName, petData, petStats, 0);
+    }
+
+    /**
+     * Calculates the final value for a single stat after applying all modifiers.
+     *
+     * @param statName the stat identifier (e.g. "Life", "Damage", "Speed")
+     * @param petData  the pet's core data (rarity, personality, bond level)
+     * @param petStats the pet's base and upgraded stat values
+     * @param petLevel the MyPet experience level (for level-based bonuses)
+     * @return the final calculated stat value
+     */
+    public double calculate(@NotNull String statName,
+                            @NotNull PetData petData,
+                            @NotNull PetStats petStats,
+                            int petLevel) {
         // Step 1: Base value = base + upgraded
         double base = petStats.baseValues().getOrDefault(statName, 0.0)
                 + petStats.upgradedValues().getOrDefault(statName, 0.0);
@@ -55,19 +67,42 @@ public final class ModifierPipeline {
         // Step 2: Rarity multiplier
         double rarityMul = petData.rarity().getStatMultiplier();
 
-        // Step 3: Personality multiplier (defaults to 1.0 if no modifier defined)
-        double personalityMul = petData.personality().getModifier(statName, 1.0);
+        // Step 3: Personality multiplier from config (falls back to enum default)
+        double personalityMul = configManager.getPersonalityModifier(petData.personality(), statName);
 
-        // Step 4: Bond level bonus (additive flat bonus)
+        // Step 4: Bond level bonus (percentage multiplier, e.g. 0.28 = +28%)
         double bondBonus = BondLevel.getStatBonus(petData.bondLevel(), statName);
 
-        // Step 5: Equipment bonus (additive)
+        // Step 5: Equipment bonus (additive flat)
         double equipBonus = 0.0;
         if (equipmentManager != null) {
             equipBonus = equipmentManager.getEquipmentStatBonus(petData.addonPetId(), statName);
         }
 
-        // Final formula
-        return (base * rarityMul * personalityMul) + bondBonus + equipBonus;
+        // Step 6: Level bonus (after configured start level)
+        double levelBonus = calculateLevelBonus(petLevel);
+
+        // Final formula: bond bonus and level bonus are percentage-based on the adjusted value
+        double adjusted = base * rarityMul * personalityMul;
+        return adjusted * (1.0 + bondBonus) * (1.0 + levelBonus) + equipBonus;
+    }
+
+    /**
+     * Calculates the percentage bonus based on pet level.
+     * Returns 0 if pet level is below the configured start level.
+     */
+    private double calculateLevelBonus(int petLevel) {
+        boolean enabled = configManager.getConfig().getBoolean("level-bonuses.enabled", false);
+        if (!enabled) {
+            return 0.0;
+        }
+        int startLevel = configManager.getInt("level-bonuses.start-level", 20);
+        if (petLevel <= startLevel) {
+            return 0.0;
+        }
+        double perLevel = configManager.getDouble("level-bonuses.per-level-bonus", 0.005);
+        double maxBonus = configManager.getDouble("level-bonuses.max-bonus", 0.25);
+        double bonus = (petLevel - startLevel) * perLevel;
+        return Math.min(bonus, maxBonus);
     }
 }

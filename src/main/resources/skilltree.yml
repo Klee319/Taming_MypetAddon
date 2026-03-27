@@ -1,0 +1,543 @@
+# ============================================================================
+#  MyPetAddon - スキルツリー自動割り当て設定
+#  テイム時のスキルツリー自動割り当てルールを定義します。
+#  優先度: per-rarity > per-mob > default > MyPet組み込みランダム
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+# skilltree: MyPetに登録されているスキルツリー名（skilltrees/*.st.json の名前）
+# weight: 選出重み（大きいほど選ばれやすい）
+#
+# 汎用スキルツリー: Combat, Farm, PvP, Ride, Utility, Tank, Assassin, Ranger, Support
+# モブ固有スキルツリー: UndeadMight, BoneShot, VenomStrike, NetherFlame, VoidWalker, PackHunter, TidalGuard
+# カスタムスキルツリーは plugins/MyPet/skilltrees/ に追加してください
+skilltree-assignment:
+  # --- デフォルト（特定の指定がない場合） ---
+  # テイム時にこのリストから重み付き抽選。進化時は fixed-skilltree で固定。
+  default:
+    - skilltree: "Combat"
+      weight: 20
+    - skilltree: "Utility"
+      weight: 15
+    - skilltree: "Farm"
+      weight: 15
+    - skilltree: "Ride"
+      weight: 10
+    - skilltree: "PvP"
+      weight: 10
+    - skilltree: "Tank"
+      weight: 10
+    - skilltree: "Assassin"
+      weight: 8
+    - skilltree: "Ranger"
+      weight: 7
+    - skilltree: "Support"
+      weight: 5
+
+  # --- レアリティ別オーバーライド（上位レアリティに強力なツリーを） ---
+  per-rarity:
+    MYTHIC:
+      - skilltree: "Assassin"
+        weight: 30
+      - skilltree: "Tank"
+        weight: 25
+      - skilltree: "Support"
+        weight: 25
+      - skilltree: "PvP"
+        weight: 20
+    LEGENDARY:
+      - skilltree: "Combat"
+        weight: 25
+      - skilltree: "Tank"
+        weight: 20
+      - skilltree: "Assassin"
+        weight: 20
+      - skilltree: "PvP"
+        weight: 15
+      - skilltree: "Support"
+        weight: 10
+      - skilltree: "Ranger"
+        weight: 10
+
+  # --- モブタイプ別オーバーライド ---
+  # モブ固有ツリーはここで高重みを設定し、汎用ツリーも低重みで混ぜる
+  per-mob:
+    ZOMBIE:
+      - skilltree: "UndeadMight"
+        weight: 40
+      - skilltree: "Combat"
+        weight: 20
+      - skilltree: "Tank"
+        weight: 20
+      - skilltree: "Assassin"
+        weight: 10
+      - skilltree: "Utility"
+        weight: 10
+    HUSK:
+      - skilltree: "UndeadMight"
+        weight: 45
+      - skilltree: "Combat"
+        weight: 25
+      - skilltree: "Tank"
+        weight: 20
+      - skilltree: "Assassin"
+        weight: 10
+    DROWNED:
+      - skilltree: "UndeadMight"
+        weight: 35
+      - skilltree: "TidalGuard"
+        weight: 25
+      - skilltree: "PvP"
+        weight: 20
+      - skilltree: "Combat"
+        weight: 20
+    ZOMBIE_VILLAGER:
+      - skilltree: "UndeadMight"
+        weight: 40
+      - skilltree: "Utility"
+        weight: 30
+      - skilltree: "Support"
+        weight: 20
+      - skilltree: "Tank"
+        weight: 10
+    ZOMBIFIED_PIGLIN:
+      - skilltree: "UndeadMight"
+        weight: 40
+      - skilltree: "NetherFlame"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 20
+      - skilltree: "Tank"
+        weight: 15
+    SKELETON:
+      - skilltree: "BoneShot"
+        weight: 45
+      - skilltree: "Ranger"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 15
+      - skilltree: "PvP"
+        weight: 15
+    STRAY:
+      - skilltree: "BoneShot"
+        weight: 45
+      - skilltree: "Ranger"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 20
+      - skilltree: "PvP"
+        weight: 10
+    BOGGED:
+      - skilltree: "BoneShot"
+        weight: 40
+      - skilltree: "VenomStrike"
+        weight: 25
+      - skilltree: "Ranger"
+        weight: 20
+      - skilltree: "PvP"
+        weight: 15
+    WITHER_SKELETON:
+      - skilltree: "BoneShot"
+        weight: 30
+      - skilltree: "Combat"
+        weight: 30
+      - skilltree: "Assassin"
+        weight: 25
+      - skilltree: "Tank"
+        weight: 15
+    SPIDER:
+      - skilltree: "VenomStrike"
+        weight: 50
+      - skilltree: "Assassin"
+        weight: 25
+      - skilltree: "PvP"
+        weight: 15
+      - skilltree: "Combat"
+        weight: 10
+    CAVE_SPIDER:
+      - skilltree: "VenomStrike"
+        weight: 55
+      - skilltree: "Assassin"
+        weight: 25
+      - skilltree: "PvP"
+        weight: 20
+    BLAZE:
+      - skilltree: "NetherFlame"
+        weight: 50
+      - skilltree: "Ranger"
+        weight: 20
+      - skilltree: "Combat"
+        weight: 15
+      - skilltree: "Assassin"
+        weight: 15
+    MAGMA_CUBE:
+      - skilltree: "NetherFlame"
+        weight: 45
+      - skilltree: "Tank"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 20
+      - skilltree: "Farm"
+        weight: 10
+    GHAST:
+      - skilltree: "NetherFlame"
+        weight: 40
+      - skilltree: "Ranger"
+        weight: 30
+      - skilltree: "Support"
+        weight: 20
+      - skilltree: "Ride"
+        weight: 10
+    ENDERMAN:
+      - skilltree: "VoidWalker"
+        weight: 50
+      - skilltree: "Assassin"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 15
+      - skilltree: "PvP"
+        weight: 10
+    ENDERMITE:
+      - skilltree: "VoidWalker"
+        weight: 50
+      - skilltree: "VenomStrike"
+        weight: 25
+      - skilltree: "Assassin"
+        weight: 15
+      - skilltree: "PvP"
+        weight: 10
+
+    WOLF:
+      - skilltree: "PackHunter"
+        weight: 50
+      - skilltree: "Combat"
+        weight: 20
+      - skilltree: "Ride"
+        weight: 15
+      - skilltree: "Assassin"
+        weight: 15
+    FOX:
+      - skilltree: "PackHunter"
+        weight: 45
+      - skilltree: "Assassin"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 15
+      - skilltree: "Ranger"
+        weight: 15
+    CAT:
+      - skilltree: "PackHunter"
+        weight: 40
+      - skilltree: "Utility"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 20
+      - skilltree: "Support"
+        weight: 15
+    OCELOT:
+      - skilltree: "PackHunter"
+        weight: 45
+      - skilltree: "Assassin"
+        weight: 25
+      - skilltree: "Ranger"
+        weight: 20
+      - skilltree: "Farm"
+        weight: 10
+    GUARDIAN:
+      - skilltree: "TidalGuard"
+        weight: 55
+      - skilltree: "Tank"
+        weight: 20
+      - skilltree: "Ranger"
+        weight: 15
+      - skilltree: "Combat"
+        weight: 10
+    ELDER_GUARDIAN:
+      - skilltree: "AbyssGuardian"
+        weight: 60
+      - skilltree: "TidalGuard"
+        weight: 20
+      - skilltree: "Tank"
+        weight: 10
+      - skilltree: "Support"
+        weight: 10
+    TURTLE:
+      - skilltree: "TidalGuard"
+        weight: 40
+      - skilltree: "Tank"
+        weight: 30
+      - skilltree: "Support"
+        weight: 20
+      - skilltree: "Utility"
+        weight: 10
+    HORSE:
+      - skilltree: "Ride"
+        weight: 50
+      - skilltree: "PackHunter"
+        weight: 20
+      - skilltree: "Farm"
+        weight: 15
+      - skilltree: "Support"
+        weight: 15
+    HOGLIN:
+      - skilltree: "Tank"
+        weight: 35
+      - skilltree: "Combat"
+        weight: 30
+      - skilltree: "UndeadMight"
+        weight: 20
+      - skilltree: "Assassin"
+        weight: 15
+    ZOGLIN:
+      - skilltree: "UndeadMight"
+        weight: 40
+      - skilltree: "Tank"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 25
+      - skilltree: "Assassin"
+        weight: 10
+    PIGLIN:
+      - skilltree: "NetherFlame"
+        weight: 30
+      - skilltree: "Ranger"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 20
+      - skilltree: "Assassin"
+        weight: 15
+      - skilltree: "PvP"
+        weight: 10
+    PIGLIN_BRUTE:
+      - skilltree: "Combat"
+        weight: 35
+      - skilltree: "Tank"
+        weight: 25
+      - skilltree: "Assassin"
+        weight: 25
+      - skilltree: "PvP"
+        weight: 15
+    CREEPER:
+      - skilltree: "Assassin"
+        weight: 35
+      - skilltree: "NetherFlame"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 20
+      - skilltree: "Tank"
+        weight: 20
+    SLIME:
+      - skilltree: "Tank"
+        weight: 35
+      - skilltree: "Utility"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 20
+      - skilltree: "Support"
+        weight: 20
+    PILLAGER:
+      - skilltree: "Ranger"
+        weight: 40
+      - skilltree: "BoneShot"
+        weight: 25
+      - skilltree: "Combat"
+        weight: 20
+      - skilltree: "PvP"
+        weight: 15
+    VINDICATOR:
+      - skilltree: "Assassin"
+        weight: 35
+      - skilltree: "Combat"
+        weight: 30
+      - skilltree: "PvP"
+        weight: 20
+      - skilltree: "Tank"
+        weight: 15
+    EVOKER:
+      - skilltree: "Support"
+        weight: 35
+      - skilltree: "VoidWalker"
+        weight: 25
+      - skilltree: "Ranger"
+        weight: 20
+      - skilltree: "PvP"
+        weight: 20
+    PHANTOM:
+      - skilltree: "VoidWalker"
+        weight: 30
+      - skilltree: "Assassin"
+        weight: 30
+      - skilltree: "Ride"
+        weight: 25
+      - skilltree: "Ranger"
+        weight: 15
+    RAVAGER:
+      - skilltree: "Tank"
+        weight: 40
+      - skilltree: "Combat"
+        weight: 30
+      - skilltree: "Ride"
+        weight: 20
+      - skilltree: "UndeadMight"
+        weight: 10
+    WARDEN:
+      - skilltree: "AbyssWarden"
+        weight: 60
+      - skilltree: "VoidWalker"
+        weight: 15
+      - skilltree: "Tank"
+        weight: 15
+      - skilltree: "Combat"
+        weight: 10
+    WITHER:
+      - skilltree: "WitherSovereign"
+        weight: 60
+      - skilltree: "NetherFlame"
+        weight: 15
+      - skilltree: "Tank"
+        weight: 15
+      - skilltree: "Combat"
+        weight: 10
+    BAT:
+      - skilltree: "Ride"
+        weight: 35
+      - skilltree: "Support"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 25
+      - skilltree: "Utility"
+        weight: 15
+    IRON_GOLEM:
+      - skilltree: "Tank"
+        weight: 40
+      - skilltree: "Combat"
+        weight: 25
+      - skilltree: "Support"
+        weight: 20
+      - skilltree: "UndeadMight"
+        weight: 15
+    SNOW_GOLEM:
+      - skilltree: "Ranger"
+        weight: 35
+      - skilltree: "Support"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 25
+      - skilltree: "Tank"
+        weight: 15
+    ALLAY:
+      - skilltree: "Support"
+        weight: 40
+      - skilltree: "Utility"
+        weight: 30
+      - skilltree: "Farm"
+        weight: 20
+      - skilltree: "Ride"
+        weight: 10
+    AXOLOTL:
+      - skilltree: "TidalGuard"
+        weight: 40
+      - skilltree: "Combat"
+        weight: 25
+      - skilltree: "Support"
+        weight: 20
+      - skilltree: "Assassin"
+        weight: 15
+    BEE:
+      - skilltree: "Farm"
+        weight: 35
+      - skilltree: "Support"
+        weight: 25
+      - skilltree: "Ranger"
+        weight: 20
+      - skilltree: "Utility"
+        weight: 20
+    DOLPHIN:
+      - skilltree: "TidalGuard"
+        weight: 35
+      - skilltree: "Ride"
+        weight: 25
+      - skilltree: "Support"
+        weight: 20
+      - skilltree: "Utility"
+        weight: 20
+    MOOSHROOM:
+      - skilltree: "Farm"
+        weight: 40
+      - skilltree: "Support"
+        weight: 25
+      - skilltree: "Tank"
+        weight: 20
+      - skilltree: "Utility"
+        weight: 15
+    PANDA:
+      - skilltree: "Tank"
+        weight: 30
+      - skilltree: "Combat"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 25
+      - skilltree: "Support"
+        weight: 20
+    POLAR_BEAR:
+      - skilltree: "Tank"
+        weight: 35
+      - skilltree: "Combat"
+        weight: 30
+      - skilltree: "PackHunter"
+        weight: 20
+      - skilltree: "Ride"
+        weight: 15
+    STRIDER:
+      - skilltree: "Ride"
+        weight: 45
+      - skilltree: "NetherFlame"
+        weight: 25
+      - skilltree: "Tank"
+        weight: 15
+      - skilltree: "Utility"
+        weight: 15
+    SQUID:
+      - skilltree: "TidalGuard"
+        weight: 35
+      - skilltree: "Utility"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 25
+      - skilltree: "Support"
+        weight: 15
+    GLOW_SQUID:
+      - skilltree: "TidalGuard"
+        weight: 35
+      - skilltree: "Support"
+        weight: 25
+      - skilltree: "Utility"
+        weight: 25
+      - skilltree: "Farm"
+        weight: 15
+    WITCH:
+      - skilltree: "Support"
+        weight: 35
+      - skilltree: "VenomStrike"
+        weight: 25
+      - skilltree: "Ranger"
+        weight: 20
+      - skilltree: "Utility"
+        weight: 20
+    CREAKING:
+      - skilltree: "PaleHorror"
+        weight: 50
+      - skilltree: "Tank"
+        weight: 20
+      - skilltree: "Assassin"
+        weight: 15
+      - skilltree: "Combat"
+        weight: 15
+    COPPER_GOLEM:
+      - skilltree: "Support"
+        weight: 35
+      - skilltree: "Utility"
+        weight: 30
+      - skilltree: "Farm"
+        weight: 20
+      - skilltree: "Tank"
+        weight: 15

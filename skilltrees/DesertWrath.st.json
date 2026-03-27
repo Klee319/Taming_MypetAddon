@@ -1,0 +1,112 @@
+{
+  "Order": 30,
+  "Description": [
+    "- <yellow><bold>砂漠の呪い (炎上 + 鈍足)",
+    "- <green><bold>乾燥の耐久力",
+    "- <red><bold>高ダメージ",
+    "- <red><bold>トゲの鎧"
+  ],
+  "Skills": {
+    "Fire": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+5",
+          "Chance": "+39"
+        },
+        "25": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "35": {
+          "Duration": "+2",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+5"
+        },
+        "30": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "15": {
+          "Damage": "+2"
+        },
+        "42": {
+          "Damage": "+3"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "20": {
+          "Reflection": "+20",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "25": {
+          "Timer": "+30",
+          "Health": "+3"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "50": {
+          "Chance": "+32"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "35": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "HUSK"
+  ],
+  "ID": "DesertWrath",
+  "Icon": {
+    "Material": "sand",
+    "Glowing": true
+  },
+  "Name": "デザートラス"
+}

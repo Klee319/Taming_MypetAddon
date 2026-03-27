@@ -1,0 +1,120 @@
+{
+  "Order": 7,
+  "Description": [
+    "- <red><bold>遠距離攻撃",
+    "- <blue><bold>スプリント",
+    "- <red><bold>鈍足",
+    "- <yellow><bold>アイテム回収 + インベントリ"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+35",
+          "Damage": "+4",
+          "Projectile": "Arrow"
+        },
+        "20": {
+          "Rate": "+25",
+          "Damage": "+3"
+        },
+        "42": {
+          "Rate": "+15",
+          "Damage": "+5"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "5": {
+          "Damage": "+4"
+        },
+        "35": {
+          "Damage": "+4"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "15": {
+          "Health": "+3"
+        },
+        "30": {
+          "Health": "+3"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "15": {
+          "Duration": "+2",
+          "Chance": "+24"
+        },
+        "35": {
+          "Duration": "+1",
+          "Chance": "+16"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "10": {
+          "Range": "+1",
+          "Exp": false
+        },
+        "30": {
+          "Range": "+2",
+          "Exp": true
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "35": {
+          "drop": false,
+          "rows": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "5": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "50": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Ranger",
+  "Icon": {
+    "Material": "bow"
+  },
+  "Name": "レンジャー"
+}

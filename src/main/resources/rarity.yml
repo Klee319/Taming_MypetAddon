@@ -1,0 +1,131 @@
+# ============================================================================
+#  MyPetAddon - レアリティ設定
+#  レアリティティアの定義、レベル帯ごとの出現重み、環境ボーナスを設定します。
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+
+rarity:
+  # --- レアリティティア定義 ---
+  tiers:
+    COMMON:
+      color: "§f"
+      stat-multiplier: 1.0
+      skill-slots: 1
+      particle: ""
+      particle-interval: 0
+      awakening: false
+    UNCOMMON:
+      color: "§a"
+      stat-multiplier: 1.15
+      skill-slots: 2
+      particle: ""
+      particle-interval: 0
+      awakening: false
+    RARE:
+      color: "§9"
+      stat-multiplier: 1.35
+      skill-slots: 3
+      particle: "HAPPY_VILLAGER"
+      particle-interval: 40
+      awakening: false
+    EPIC:
+      color: "§5"
+      stat-multiplier: 1.6
+      skill-slots: 4
+      particle: "WITCH"
+      particle-interval: 30
+      awakening: true
+    LEGENDARY:
+      color: "§6"
+      stat-multiplier: 2.0
+      skill-slots: 5
+      particle: "TOTEM_OF_UNDYING"
+      particle-interval: 20
+      awakening: true
+    MYTHIC:
+      color: "§d"
+      stat-multiplier: 2.5
+      skill-slots: 6
+      particle: "DRAGON_BREATH"
+      particle-interval: 10
+      awakening: true
+
+  # --- レベル帯ごとのレアリティ重み ---
+  # LevelledMobs のレベルに基づいてレアリティが決定されます
+  # 各レアリティの重みが高いほど選ばれやすくなります
+  level-ranges:
+    "1-10":
+      COMMON: 60
+      UNCOMMON: 25
+      RARE: 10
+      EPIC: 4
+      LEGENDARY: 1
+      MYTHIC: 0
+    "11-25":
+      COMMON: 35
+      UNCOMMON: 30
+      RARE: 20
+      EPIC: 10
+      LEGENDARY: 4
+      MYTHIC: 1
+    "26-50":
+      COMMON: 15
+      UNCOMMON: 25
+      RARE: 25
+      EPIC: 20
+      LEGENDARY: 10
+      MYTHIC: 5
+    "51-75":
+      COMMON: 5
+      UNCOMMON: 15
+      RARE: 25
+      EPIC: 30
+      LEGENDARY: 15
+      MYTHIC: 10
+    "76-90":
+      COMMON: 0
+      UNCOMMON: 10
+      RARE: 15
+      EPIC: 30
+      LEGENDARY: 30
+      MYTHIC: 15
+    "91-100":
+      COMMON: 0
+      UNCOMMON: 5
+      RARE: 15
+      EPIC: 25
+      LEGENDARY: 35
+      MYTHIC: 20
+    "101-200":
+      COMMON: 0
+      UNCOMMON: 0
+      RARE: 10
+      EPIC: 20
+      LEGENDARY: 30
+      MYTHIC: 40
+  # LevelledMobs が導入されていない場合のフォールバック重み
+  no-levelledmobs-fallback:
+    COMMON: 40
+    UNCOMMON: 25
+    RARE: 18
+    EPIC: 10
+    LEGENDARY: 5
+    MYTHIC: 2
+
+  # --- 環境ボーナス ---
+  # 特定の環境条件でレアリティの出現率にボーナスが付きます
+  # 値はレアリティ判定時に上位ティアの重みに加算されるポイント
+  environment-bonuses:
+    # 満月の夜
+    full-moon: 5
+    # 雷雨
+    thunderstorm: 10
+    # バイオーム別ボーナス (Minecraft内部バイオームキーを使用)
+    biome:
+      deep_dark: 10
+    # ディメンション別ボーナス
+    dimension:
+      nether: 5
+      the-end: 10
+    # ボーナスの累積上限
+    max-bonus-cap: 30

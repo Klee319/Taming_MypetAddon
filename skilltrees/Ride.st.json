@@ -1,0 +1,136 @@
+{
+  "Order": 3,
+  "Description": [
+    "- <yellow><bold>騎乗",
+    "- <red><bold>遠距離攻撃",
+    "- <yellow><bold>インベントリ + アイテム回収",
+    "- <blue><bold>スプリント",
+    "- <red><bold>トゲ",
+    "- <yellow><bold>ビーコン (速度)"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "5": {
+          "Rate": "+35",
+          "Damage": "+3",
+          "Projectile": "Snowball"
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "10": {
+          "drop": false,
+          "rows": "+2"
+        },
+        "20": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "15": {
+          "Range": "+1",
+          "Exp": false
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "50": {
+          "Buffs": {
+            "Regeneration": "+2",
+            "WaterBreathing": true
+          },
+          "Duration": "+8",
+          "Count": "+1",
+          "Range": "+10"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "15": {
+          "Damage": "+2"
+        },
+        "30": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "10": {
+          "Health": "+3"
+        },
+        "25": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "42": {
+          "Reflection": "+15",
+          "Chance": "+48"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "5": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "30": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "35": {
+          "Active": true
+        }
+      }
+    },
+    "Ride": {
+      "Upgrades": {
+        "1": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+1.25"
+        },
+        "50": {
+          "CanFly": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Ride",
+  "Icon": {
+    "Material": "saddle",
+    "Glowing": true
+  },
+  "Name": "ライド"
+}

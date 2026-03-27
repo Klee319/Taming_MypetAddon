@@ -1,0 +1,141 @@
+{
+  "Order": 19,
+  "Description": [
+    "- <aqua><bold>氷の爪 (高ダメージ + 鈍足)",
+    "- <green><bold>極地の耐久力 (HP + トゲ)",
+    "- <blue><bold>スプリント + 騎乗",
+    "- <yellow><bold>ビーコン (耐性)"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+2"
+        },
+        "15": {
+          "Damage": "+2"
+        },
+        "30": {
+          "Damage": "+3"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "5": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "25": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "10": {
+          "Health": "+5"
+        },
+        "35": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "20": {
+          "Reflection": "+20",
+          "Chance": "+32"
+        },
+        "42": {
+          "Reflection": "+15",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    },
+    "Ride": {
+      "Upgrades": {
+        "25": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+1.5"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+30",
+          "Health": "+3"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "30": {
+          "Chance": "+32"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "50": {
+          "Buffs": {
+            "Resistance": "+2",
+            "Strength": "+1"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "35": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "PolarBear",
+    "PANDA",
+    "GOAT"
+  ],
+  "ID": "FrostClaw",
+  "Icon": {
+    "Material": "packed_ice",
+    "Glowing": true
+  },
+  "Name": "フロストクロー"
+}

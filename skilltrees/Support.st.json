@@ -1,0 +1,110 @@
+{
+  "Order": 8,
+  "Description": [
+    "- <yellow><bold>ビーコン (再生 + 筋力 + 耐性)",
+    "- <green><bold>強力回復",
+    "- <green><bold>HP増加",
+    "- <yellow><bold>大容量インベントリ"
+  ],
+  "Skills": {
+    "Heal": {
+      "Upgrades": {
+        "1": {
+          "Timer": "+30",
+          "Health": "+3"
+        },
+        "20": {
+          "Timer": "+20",
+          "Health": "+4"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+5"
+        },
+        "30": {
+          "Health": "+9"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "10": {
+          "Buffs": {
+            "Regeneration": "+1"
+          },
+          "Duration": "+8",
+          "Count": "+1",
+          "Range": "+5"
+        },
+        "25": {
+          "Buffs": {
+            "Regeneration": "+1",
+            "Strength": "+1"
+          },
+          "Duration": "+4",
+          "Count": "+1",
+          "Range": "+3"
+        },
+        "50": {
+          "Buffs": {
+            "Regeneration": "+1",
+            "Strength": "+1",
+            "Resistance": "+1"
+          },
+          "Duration": "+4",
+          "Count": "+1",
+          "Range": "+5"
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "15": {
+          "drop": false,
+          "rows": "+2"
+        },
+        "35": {
+          "drop": false,
+          "rows": "+2"
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "42": {
+          "Range": "+3",
+          "Exp": true
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "20": {
+          "Damage": "+4"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "15": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Support",
+  "Icon": {
+    "Material": "golden_apple"
+  },
+  "Name": "サポート"
+}

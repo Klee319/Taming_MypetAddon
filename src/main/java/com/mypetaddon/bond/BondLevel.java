@@ -1,6 +1,8 @@
 package com.mypetaddon.bond;
 
+import com.mypetaddon.config.ConfigManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -20,21 +22,32 @@ public final class BondLevel {
     private static final int[] EXP_THRESHOLDS = {
             0,      // Level 1: 0 exp
             100,    // Level 2: 100 exp
-            350,    // Level 3: 350 exp
-            750,    // Level 4: 750 exp
-            1500    // Level 5: 1500 exp
+            300,    // Level 3: 300 exp
+            600,    // Level 4: 600 exp
+            1000    // Level 5: 1000 exp
     };
 
     private static final Map<Integer, Map<String, Double>> STAT_BONUSES = Map.of(
-            1, Map.of("health", 0.0, "damage", 0.0, "speed", 0.0),
-            2, Map.of("health", 0.05, "damage", 0.03, "speed", 0.02),
-            3, Map.of("health", 0.10, "damage", 0.07, "speed", 0.05),
-            4, Map.of("health", 0.18, "damage", 0.12, "speed", 0.08),
-            5, Map.of("health", 0.28, "damage", 0.20, "speed", 0.12)
+            1, Map.of("Life", 0.0, "Damage", 0.0, "Speed", 0.0),
+            2, Map.of("Life", 0.05, "Damage", 0.03, "Speed", 0.02),
+            3, Map.of("Life", 0.10, "Damage", 0.07, "Speed", 0.05),
+            4, Map.of("Life", 0.18, "Damage", 0.12, "Speed", 0.08),
+            5, Map.of("Life", 0.28, "Damage", 0.20, "Speed", 0.12)
     );
+
+    /** Optional config source for overriding defaults. Set via {@link #initialize(ConfigManager)}. */
+    @Nullable
+    private static volatile ConfigManager configManager;
 
     private BondLevel() {
         // Utility class - no instantiation
+    }
+
+    /**
+     * Initializes config-based overrides. Call once during plugin startup.
+     */
+    public static void initialize(@NotNull ConfigManager cm) {
+        configManager = cm;
     }
 
     /**
@@ -45,9 +58,9 @@ public final class BondLevel {
      */
     public static int fromExp(int exp) {
         int level = MIN_LEVEL;
-        for (int i = EXP_THRESHOLDS.length - 1; i >= 0; i--) {
-            if (exp >= EXP_THRESHOLDS[i]) {
-                level = i + 1;
+        for (int i = MAX_LEVEL; i >= MIN_LEVEL; i--) {
+            if (exp >= getExpForLevel(i)) {
+                level = i;
                 break;
             }
         }
@@ -66,6 +79,14 @@ public final class BondLevel {
             throw new IllegalArgumentException(
                     "Bond level must be between " + MIN_LEVEL + " and " + MAX_LEVEL + ", got: " + level);
         }
+        // Read from config, fall back to hardcoded default
+        ConfigManager cm = configManager;
+        if (cm != null) {
+            int configValue = cm.getBondExpThreshold(level);
+            if (configValue >= 0) {
+                return configValue;
+            }
+        }
         return EXP_THRESHOLDS[level - 1];
     }
 
@@ -74,7 +95,7 @@ public final class BondLevel {
      * Returns 0.0 if the stat name is not recognized for that level.
      *
      * @param level    the bond level (1-5)
-     * @param statName the stat identifier (e.g. "health", "damage", "speed")
+     * @param statName the stat identifier (e.g. "Life", "Damage", "Speed")
      * @return the bonus multiplier (e.g. 0.10 means +10%)
      * @throws IllegalArgumentException if level is out of range
      */
@@ -82,6 +103,14 @@ public final class BondLevel {
         if (level < MIN_LEVEL || level > MAX_LEVEL) {
             throw new IllegalArgumentException(
                     "Bond level must be between " + MIN_LEVEL + " and " + MAX_LEVEL + ", got: " + level);
+        }
+        // Read from config, fall back to hardcoded default
+        ConfigManager cm = configManager;
+        if (cm != null) {
+            double configValue = cm.getBondStatBonus(level, statName);
+            if (configValue >= 0.0) {
+                return configValue;
+            }
         }
         return STAT_BONUSES.get(level).getOrDefault(statName, 0.0);
     }
@@ -101,6 +130,6 @@ public final class BondLevel {
         if (currentLevel >= MAX_LEVEL) {
             return 0;
         }
-        return EXP_THRESHOLDS[currentLevel] - EXP_THRESHOLDS[currentLevel - 1];
+        return getExpForLevel(currentLevel + 1) - getExpForLevel(currentLevel);
     }
 }

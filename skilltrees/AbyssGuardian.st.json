@@ -1,0 +1,149 @@
+{
+  "Order": 52,
+  "Description": [
+    "- <dark_aqua><bold>深海の主 (レーザー砲撃)",
+    "- <aqua><bold>潮の要塞 (超トゲ + 超HP)",
+    "- <yellow><bold>深海のビーコン (水中呼吸 + 耐性 + 再生)",
+    "- <green><bold>不沈の回復"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+45",
+          "Damage": "+5",
+          "Projectile": "Arrow"
+        },
+        "15": {
+          "Rate": "+30",
+          "Damage": "+4"
+        },
+        "30": {
+          "Rate": "+20",
+          "Damage": "+4"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "1": {
+          "Reflection": "+30",
+          "Chance": "+39"
+        },
+        "20": {
+          "Reflection": "+25",
+          "Chance": "+26"
+        },
+        "42": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+10"
+        },
+        "20": {
+          "Health": "+10"
+        },
+        "35": {
+          "Health": "+10"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "10": {
+          "Timer": "+20",
+          "Health": "+6"
+        },
+        "30": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "15": {
+          "Buffs": {
+            "WaterBreathing": true,
+            "Resistance": "+1"
+          },
+          "Duration": "+12",
+          "Count": "+1",
+          "Range": "+12"
+        },
+        "35": {
+          "Buffs": {
+            "Regeneration": "+2",
+            "Resistance": "+1"
+          },
+          "Duration": "+8",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "25": {
+          "Duration": "+5",
+          "Chance": "+39"
+        },
+        "50": {
+          "Duration": "+3",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "10": {
+          "Damage": "+2"
+        },
+        "42": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ElderGuardian"
+  ],
+  "ID": "AbyssGuardian",
+  "Icon": {
+    "Material": "sea_lantern",
+    "Glowing": true
+  },
+  "Name": "アビスガーディアン"
+}

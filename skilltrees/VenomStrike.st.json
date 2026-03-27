@@ -1,0 +1,105 @@
+{
+  "Order": 12,
+  "Description": [
+    "- <dark_green><bold>猛毒",
+    "- <red><bold>鈍足",
+    "- <blue><bold>高速スプリント",
+    "- <red><bold>毒炎"
+  ],
+  "Skills": {
+    "Poison": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+3",
+          "Chance": "+32"
+        },
+        "20": {
+          "Duration": "+2",
+          "Chance": "+20"
+        },
+        "42": {
+          "Duration": "+2",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+2",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Fire": {
+      "Upgrades": {
+        "30": {
+          "Duration": "+2",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+2"
+        },
+        "15": {
+          "Damage": "+2"
+        },
+        "35": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "25": {
+          "Health": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "50": {
+          "Active": true
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "50": {
+          "Range": "+2",
+          "Exp": false
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "SPIDER",
+    "CaveSpider"
+  ],
+  "ID": "VenomStrike",
+  "Icon": {
+    "Material": "spider_eye"
+  },
+  "Name": "ヴェノムストライク"
+}

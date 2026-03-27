@@ -1,0 +1,73 @@
+# ============================================================================
+#  MyPetAddon - 絆 (Bond) 設定
+#  絆レベルの定義、経験値の獲得・減少量、デバウンス設定を管理します。
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+
+bond:
+  # --- 絆レベル定義 ---
+  # exp-threshold: このレベルに到達するための最低累積経験値
+  # stat-bonuses: Life/Damage/Speedへの倍率ボーナス (0.10 = +10%)
+  levels:
+    1:
+      exp-threshold: 0
+      stat-bonuses:
+        Life: 0.0
+        Damage: 0.0
+        Speed: 0.0
+      bonus: "なし"
+    2:
+      exp-threshold: 200
+      stat-bonuses:
+        Life: 0.05
+        Damage: 0.03
+        Speed: 0.02
+      bonus: "ステータス +5%"
+    3:
+      exp-threshold: 600
+      stat-bonuses:
+        Life: 0.10
+        Damage: 0.07
+        Speed: 0.05
+      bonus: "ステータス +10%"
+    4:
+      exp-threshold: 1200
+      stat-bonuses:
+        Life: 0.18
+        Damage: 0.12
+        Speed: 0.08
+      bonus: "ステータス +15%"
+    5:
+      exp-threshold: 2000
+      stat-bonuses:
+        Life: 0.28
+        Damage: 0.20
+        Speed: 0.12
+      bonus: "ステータス +25%"
+
+  # --- 絆経験値の獲得量 ---
+  # ペットの好感度は主にエサやりで上げる設計です
+  gain:
+    # 戦闘でモブを倒した時
+    combat-kill: 5
+    # ペットにエサを与えた時（好物メイン）
+    feeding: 100
+    # ログイン時にペットを召喚した時
+    login-summon: 0
+    # ペットに騎乗中 (1分あたり)
+    riding-per-minute: 0
+
+  # --- 絆経験値の減少 ---
+  loss:
+    # 日次の自然減少量
+    daily-decay: 3
+    # ペットが死亡した時の減少量
+    pet-death: 30
+    # オフライン中の最大累積減少量
+    max-offline-decay: 80
+
+  # --- デバウンス設定 ---
+  # 短時間に連続して獲得されることを防ぐクールダウン (ミリ秒)
+  debounce:
+    combat-kill-cooldown: 10000
+    feeding-cooldown: 1200000

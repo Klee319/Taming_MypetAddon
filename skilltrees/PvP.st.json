@@ -1,0 +1,122 @@
+{
+  "Order": 2,
+  "Description": [
+    "- <red><bold>ダメージ強化",
+    "- <blue><bold>スプリント",
+    "- <red><bold>鈍足 + 発火",
+    "- <yellow><bold>ビーコン"
+  ],
+  "Skills": {
+    "Backpack": {
+      "Upgrades": {
+        "25": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "15": {
+          "Duration": "+2",
+          "Chance": "+16"
+        },
+        "42": {
+          "Duration": "+1",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Fire": {
+      "Upgrades": {
+        "20": {
+          "Duration": "+3",
+          "Chance": "+24"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "30": {
+          "Buffs": {
+            "Resistance": "+1",
+            "Strength": "+1"
+          },
+          "Duration": "+8",
+          "Count": "+1",
+          "Range": "+5"
+        },
+        "50": {
+          "Buffs": {
+            "Resistance": "+2",
+            "Strength": "+2"
+          },
+          "Duration": "+2",
+          "Count": "+1",
+          "Range": "+5"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "42": {
+          "Health": "+12"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "35": {
+          "Timer": "+60",
+          "Health": "+5"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "10": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "15": {
+          "Active": true
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+3"
+        },
+        "5": {
+          "Damage": "+4"
+        },
+        "20": {
+          "Damage": "+3"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "PvP",
+  "Icon": {
+    "Material": "diamond_sword"
+  },
+  "Name": "PvP"
+}

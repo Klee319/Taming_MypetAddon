@@ -1,0 +1,103 @@
+{
+  "Order": 44,
+  "Description": [
+    "- <red><bold>蛮力 (最高ダメージ + ノックバック)",
+    "- <green><bold>高HP + 高回復",
+    "- <red><bold>トゲ",
+    "- <yellow><bold>ビーコン (力 + 耐性)"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+4"
+        },
+        "15": {
+          "Damage": "+4"
+        },
+        "30": {
+          "Damage": "+4"
+        },
+        "50": {
+          "Damage": "+4"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+6"
+        },
+        "25": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "10": {
+          "Chance": "+39"
+        },
+        "35": {
+          "Chance": "+26"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "20": {
+          "Timer": "+30",
+          "Health": "+5"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "42": {
+          "Reflection": "+25",
+          "Chance": "+32"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "50": {
+          "Buffs": {
+            "Strength": "+2",
+            "Resistance": "+1"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "PiglinBrute"
+  ],
+  "ID": "BruteForce",
+  "Icon": {
+    "Material": "golden_axe",
+    "Glowing": true
+  },
+  "Name": "ブルートフォース"
+}

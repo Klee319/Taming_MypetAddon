@@ -26,12 +26,21 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,20 +77,28 @@ public final class TamingManager {
     /** Player UUID -> pending name assignment for a tamed monster. */
     private final Map<UUID, PendingName> pendingNames = new ConcurrentHashMap<>();
 
+    /** Entity UUID -> taming attempt count (for max-attempts-per-mob limit). */
+    private final Map<UUID, Integer> tamingAttempts = new ConcurrentHashMap<>();
+
     /**
      * Represents a monster that a player is attempting to tame (awaiting kill).
      */
-    public record PendingTame(@NotNull LivingEntity entity, long timestamp) {}
+    public record PendingTame(@NotNull LivingEntity entity, long timestamp, @Nullable ItemStack consumedItem) {}
 
     /**
      * Represents a tamed monster awaiting a name from the player.
+     * Stores the entityType and visual info from the original entity so we can create
+     * the MyPet correctly even after the original entity is dead.
      */
     public record PendingName(
             @NotNull Entity dummyEntity,
-            @NotNull LivingEntity originalEntity,
+            @NotNull EntityType entityType,
             @NotNull Rarity rarity,
             @NotNull Personality personality,
-            long timestamp
+            long timestamp,
+            @Nullable Object entityInfo,
+            @Nullable ItemStack consumedItem,
+            double capturedScale
     ) {}
 
     public TamingManager(@NotNull MyPetAddonPlugin plugin,
@@ -127,9 +144,30 @@ public final class TamingManager {
             return false;
         }
 
-        // Skip entities with AI disabled (already being tamed or is a dummy)
-        if (!entity.hasAI()) {
+        // Skip our own dummy entities (AI disabled + invulnerable)
+        if (!entity.hasAI() && entity.isInvulnerable()) {
             return false;
+        }
+
+        // Only one pending name per player
+        if (pendingNames.containsKey(player.getUniqueId())) {
+            return false;
+        }
+
+        // Block if another player is already taming this entity
+        if (isEntityClaimedByOther(entity, player.getUniqueId())) {
+            player.sendMessage("§c他のプレイヤーがこのモブをテイム中です。");
+            return true;
+        }
+
+        // Check max attempts per mob
+        int maxAttempts = configManager.getMaxAttemptsPerMob();
+        if (maxAttempts > 0) {
+            int attempts = tamingAttempts.getOrDefault(entity.getUniqueId(), 0);
+            if (attempts >= maxAttempts) {
+                player.sendMessage("§cこのモブにはこれ以上テイムを試行できません。（" + maxAttempts + "/" + maxAttempts + "回）");
+                return true;
+            }
         }
 
         // Find matching taming item from config list
@@ -139,18 +177,32 @@ public final class TamingManager {
             return false;
         }
 
-        // Consume item if configured
+        // Save a copy of the consumed item before consuming (for refund on failure)
+        ItemStack consumedItemCopy = null;
         if (matched.consume()) {
+            consumedItemCopy = mainHand.asOne();
             mainHand.setAmount(mainHand.getAmount() - 1);
+            // Force inventory update next tick to prevent other plugins from reverting item consumption
+            Bukkit.getScheduler().runTask(plugin, () -> player.updateInventory());
+        }
+
+        // Increment attempt counter
+        if (maxAttempts > 0) {
+            tamingAttempts.merge(entity.getUniqueId(), 1, Integer::sum);
         }
 
         // Check success rate
         if (matched.successRate() < 1.0
                 && ThreadLocalRandom.current().nextDouble() >= matched.successRate()) {
+            int current = tamingAttempts.getOrDefault(entity.getUniqueId(), 0);
             int pct = (int) (matched.successRate() * 100);
-            player.sendMessage("§cテイミングに失敗しました... (成功率: §f" + pct + "%§c)");
+            String attemptMsg = maxAttempts > 0 ? " §7(" + current + "/" + maxAttempts + "回)" : "";
+            player.sendMessage("§cテイミングに失敗しました... (成功率: §f" + pct + "%§c)" + attemptMsg);
             return true;
         }
+
+        // Taming succeeded — clear attempt counter
+        tamingAttempts.remove(entity.getUniqueId());
 
         // Visual/audio feedback
         entity.getWorld().spawnParticle(Particle.HEART, entity.getLocation(),
@@ -162,39 +214,39 @@ public final class TamingManager {
         Rarity rarity = rarityManager.rollRarity(entity, player);
         Personality personality = personalityManager.rollPersonality();
 
-        // Create MyPet (uses entity type name as default pet name for animals)
-        String petName = entity.getType().name();
-        InactiveMyPet inactiveMyPet = createMyPetFromEntity(player, entity, petName);
-        if (inactiveMyPet == null) {
-            player.sendMessage("§cペットの作成に失敗しました。");
-            return true;
-        }
+        // Capture entity visual info and scale before disabling AI
+        Object entityInfo = captureEntityInfo(entity);
+        double capturedScale = captureScale(entity);
 
-        // Assign skill tree based on config rules
-        String mobType = entity.getType().name();
-        skilltreeAssigner.assignOnTame(inactiveMyPet, rarity, mobType);
+        // Make the entity a "dummy" (stop moving, invulnerable) while waiting for name
+        entity.setAI(false);
+        entity.setInvulnerable(true);
 
-        // Remove the original entity
-        entity.remove();
+        // Store in pending names for /pettame command (include consumed item for refund)
+        pendingNames.put(player.getUniqueId(), new PendingName(
+                entity, entity.getType(), rarity, personality, System.currentTimeMillis(),
+                entityInfo, consumedItemCopy, capturedScale));
 
-        // Create addon data
-        UUID addonPetId = UUID.randomUUID();
-
-        PetData petData = new PetData(
-                addonPetId, inactiveMyPet.getUUID(), player.getUniqueId(),
-                mobType, rarity, personality,
-                1, 0, 0, System.currentTimeMillis() / 1000L, null
-        );
-        PetStats petStats = statsManager.createBaseStats(petData);
-
-        // Save to cache
-        petDataCache.put(petData, petStats);
-
-        // Record in encyclopedia
-        encyclopediaRepository.recordTame(player.getUniqueId(), mobType, rarity);
-
-        player.sendMessage("§a§l能力を開放した！ "
+        // Notify player
+        player.sendMessage("§a仲間にできそうだ！ "
                 + rarity.getColoredName() + " §7[" + personality.getDisplayName() + "]");
+        player.sendMessage("§a/pettame <名前> で仲間にします（"
+                + (configManager.getTamingTimeout() / 1000L) + "秒後キャンセルされます）");
+
+        // Schedule timeout
+        long timeoutTicks = (configManager.getTamingTimeout() / 1000L) * 20L;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            PendingName stillPending = pendingNames.get(player.getUniqueId());
+            if (stillPending != null && stillPending.dummyEntity().equals(entity)) {
+                // Restore the entity to normal state
+                entity.setAI(true);
+                entity.setInvulnerable(false);
+                pendingNames.remove(player.getUniqueId());
+                if (player.isOnline()) {
+                    player.sendMessage("§c名前をつける時間が過ぎました。仲間にできませんでした。");
+                }
+            }
+        }, timeoutTicks);
 
         return true;
     }
@@ -221,9 +273,25 @@ public final class TamingManager {
             return false;
         }
 
-        // Skip entities with AI disabled
-        if (!entity.hasAI()) {
+        // Skip our own dummy entities (AI disabled + invulnerable)
+        if (!entity.hasAI() && entity.isInvulnerable()) {
             return false;
+        }
+
+        // Block if another player is already taming this entity
+        if (isEntityClaimedByOther(entity, player.getUniqueId())) {
+            player.sendMessage("§c他のプレイヤーがこのモブをテイム中です。");
+            return true;
+        }
+
+        // Check max attempts per mob
+        int maxAttempts = configManager.getMaxAttemptsPerMob();
+        if (maxAttempts > 0) {
+            int attempts = tamingAttempts.getOrDefault(entity.getUniqueId(), 0);
+            if (attempts >= maxAttempts) {
+                player.sendMessage("§cこのモブにはこれ以上テイムを試行できません。（" + maxAttempts + "/" + maxAttempts + "回）");
+                return true;
+            }
         }
 
         // Find matching taming item from config list
@@ -233,22 +301,36 @@ public final class TamingManager {
             return false;
         }
 
-        // Consume item if configured
+        // Save a copy of the consumed item before consuming (for refund on failure)
+        ItemStack consumedItemCopy = null;
         if (matched.consume()) {
+            consumedItemCopy = mainHand.asOne();
             mainHand.setAmount(mainHand.getAmount() - 1);
+            // Force inventory update next tick to prevent other plugins from reverting item consumption
+            Bukkit.getScheduler().runTask(plugin, () -> player.updateInventory());
+        }
+
+        // Increment attempt counter
+        if (maxAttempts > 0) {
+            tamingAttempts.merge(entity.getUniqueId(), 1, Integer::sum);
         }
 
         // Check success rate (for monster, rate check happens at tame start)
         if (matched.successRate() < 1.0
                 && ThreadLocalRandom.current().nextDouble() >= matched.successRate()) {
+            int current = tamingAttempts.getOrDefault(entity.getUniqueId(), 0);
             int pct = (int) (matched.successRate() * 100);
-            player.sendMessage("§cテイミングに失敗しました... (成功率: §f" + pct + "%§c)");
+            String attemptMsg = maxAttempts > 0 ? " §7(" + current + "/" + maxAttempts + "回)" : "";
+            player.sendMessage("§cテイミングに失敗しました... (成功率: §f" + pct + "%§c)" + attemptMsg);
             return true;
         }
 
-        // Register pending tame
+        // Taming succeeded — clear attempt counter
+        tamingAttempts.remove(entity.getUniqueId());
+
+        // Register pending tame (include consumed item for refund)
         pendingMonsterTames.put(player.getUniqueId(),
-                new PendingTame(entity, System.currentTimeMillis()));
+                new PendingTame(entity, System.currentTimeMillis(), consumedItemCopy));
 
         player.sendMessage("§eこの敵を倒して仲間にしよう！");
 
@@ -263,31 +345,34 @@ public final class TamingManager {
      * @param killer the player who killed it (may be null)
      * @return true if the death was handled as a tame event
      */
-    public boolean handleMonsterDeath(@NotNull LivingEntity entity, @Nullable Player killer) {
-        if (killer == null) {
-            // If a pending tame entity died without a player kill, clean up
-            cleanupPendingTameForEntity(entity);
-            return false;
-        }
-
-        UUID killerUuid = killer.getUniqueId();
-        PendingTame pending = pendingMonsterTames.get(killerUuid);
+    public boolean handleMonsterDeath(@NotNull LivingEntity entity, @NotNull Player tamingPlayer) {
+        UUID playerUuid = tamingPlayer.getUniqueId();
+        PendingTame pending = pendingMonsterTames.get(playerUuid);
 
         if (pending == null || !pending.entity().equals(entity)) {
-            // Clean up if this entity was pending for another player who didn't kill it
-            cleanupPendingTameForEntity(entity);
             return false;
         }
 
         // Remove from pending tames
-        pendingMonsterTames.remove(killerUuid);
+        pendingMonsterTames.remove(playerUuid);
 
-        // Spawn dummy entity (AI off, invulnerable)
+        // Capture entity visual info (color, size, etc.) and scale BEFORE it despawns
+        Object entityInfo = captureEntityInfo(entity);
+        double capturedScale = captureScale(entity);
+
+        // Spawn dummy entity (AI off, invulnerable) and copy original entity's properties
         Entity dummyEntity = entity.getWorld().spawnEntity(
                 entity.getLocation(), entity.getType());
         if (dummyEntity instanceof LivingEntity livingDummy) {
             livingDummy.setAI(false);
             livingDummy.setInvulnerable(true);
+            copyEntityProperties(entity, livingDummy);
+            if (capturedScale > 0.0) {
+                AttributeInstance scaleAttr = livingDummy.getAttribute(Attribute.SCALE);
+                if (scaleAttr != null) {
+                    scaleAttr.setBaseValue(capturedScale);
+                }
+            }
         }
 
         // Visual/audio feedback
@@ -297,28 +382,29 @@ public final class TamingManager {
                 Sound.ENTITY_PLAYER_LEVELUP, 2.0f, 1.0f);
 
         // Roll rarity and personality
-        Rarity rarity = rarityManager.rollRarity(entity, killer);
+        Rarity rarity = rarityManager.rollRarity(entity, tamingPlayer);
         Personality personality = personalityManager.rollPersonality();
 
-        // Store in pending names
-        pendingNames.put(killerUuid, new PendingName(
-                dummyEntity, entity, rarity, personality, System.currentTimeMillis()));
+        // Store in pending names (capture entityType, visual info, and consumed item from original entity)
+        pendingNames.put(playerUuid, new PendingName(
+                dummyEntity, entity.getType(), rarity, personality, System.currentTimeMillis(),
+                entityInfo, pending.consumedItem(), capturedScale));
 
         // Notify player
-        killer.sendMessage("§a敵が仲間になりたいようだ！ "
+        tamingPlayer.sendMessage("§a敵が仲間になりたいようだ！ "
                 + rarity.getColoredName() + " §7[" + personality.getDisplayName() + "]");
-        killer.sendMessage("§a/named <名前> で仲間にします（"
+        tamingPlayer.sendMessage("§a/pettame <名前> で仲間にします（"
                 + (configManager.getTamingTimeout() / 1000L) + "秒後デスポーンします）");
 
         // Schedule timeout
         long timeoutTicks = (configManager.getTamingTimeout() / 1000L) * 20L;
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            PendingName stillPending = pendingNames.get(killerUuid);
+            PendingName stillPending = pendingNames.get(playerUuid);
             if (stillPending != null && stillPending.dummyEntity().equals(dummyEntity)) {
                 dummyEntity.remove();
-                pendingNames.remove(killerUuid);
-                if (killer.isOnline()) {
-                    killer.sendMessage("§c名前をつける時間が過ぎました。仲間にできませんでした。");
+                pendingNames.remove(playerUuid);
+                if (tamingPlayer.isOnline()) {
+                    tamingPlayer.sendMessage("§c名前をつける時間が過ぎました。仲間にできませんでした。");
                 }
             }
         }, timeoutTicks);
@@ -327,7 +413,8 @@ public final class TamingManager {
     }
 
     /**
-     * Handles the /named command for naming a pending tamed monster.
+     * Handles the /pettame command for naming a pending tamed creature.
+     * Works for both animals (entity still alive as dummy) and monsters (entity dead, using type).
      *
      * @param player the player assigning the name
      * @param name   the desired pet name
@@ -342,23 +429,40 @@ public final class TamingManager {
 
         PendingName pending = pendingNames.remove(player.getUniqueId());
         if (pending == null) {
-            player.sendMessage("§c仲間にできる敵が存在しません。");
+            player.sendMessage("§c仲間にできるモブが存在しません。");
             return false;
         }
 
-        // Remove dummy entity
-        pending.dummyEntity().remove();
+        Entity dummyEntity = pending.dummyEntity();
+        String mobType = pending.entityType().name();
+        InactiveMyPet inactiveMyPet;
 
-        // Create MyPet
-        InactiveMyPet inactiveMyPet = createMyPetFromEntity(
-                player, pending.dummyEntity(), name);
+        // Always prefer captured entityInfo (from the original entity) over the dummy's
+        // live state. For monster taming, the dummy is a newly spawned entity that may
+        // randomly differ from the original (e.g. baby zombie spawning at 5% chance).
+        // For animal taming, the dummy IS the original, but using captured info is equally
+        // correct and more consistent.
+        if (pending.entityInfo() != null) {
+            inactiveMyPet = createMyPetByType(player, pending.entityType(), name, pending.entityInfo());
+        } else if (dummyEntity.isValid() && dummyEntity instanceof LivingEntity livingDummy) {
+            // Fallback: no captured info available, read from live entity
+            inactiveMyPet = createMyPetFromEntity(player, livingDummy, name);
+        } else {
+            inactiveMyPet = createMyPetByType(player, pending.entityType(), name, null);
+        }
+        // Clean up the dummy entity
+        if (dummyEntity.isValid()) {
+            dummyEntity.remove();
+        }
+
         if (inactiveMyPet == null) {
-            player.sendMessage("§cペットの作成に失敗しました。");
+            player.sendMessage("§cペットの作成に失敗しました。このモブはMyPetに対応していない可能性があります。");
+            // Refund consumed taming item
+            refundConsumedItem(player, pending.consumedItem());
             return false;
         }
 
         // Assign skill tree based on config rules
-        String mobType = pending.originalEntity().getType().name();
         skilltreeAssigner.assignOnTame(inactiveMyPet, pending.rarity(), mobType);
 
         // Create addon data
@@ -367,27 +471,34 @@ public final class TamingManager {
         PetData petData = new PetData(
                 addonPetId, inactiveMyPet.getUUID(), player.getUniqueId(),
                 mobType, pending.rarity(), pending.personality(),
-                1, 0, 0, System.currentTimeMillis() / 1000L, null
-        );
+                1, 0, 0, System.currentTimeMillis() / 1000L, null, pending.capturedScale());
         PetStats petStats = statsManager.createBaseStats(petData);
 
-        // Save to cache
+        // Save to cache BEFORE activation (applyStats reads from cache)
         petDataCache.put(petData, petStats);
 
-        // Record in encyclopedia
-        encyclopediaRepository.recordTame(player.getUniqueId(), mobType, pending.rarity());
+        // Record in encyclopedia (async to avoid blocking main thread with JDBC)
+        UUID playerUuid = player.getUniqueId();
+        String finalMobType = mobType;
+        com.mypetaddon.rarity.Rarity finalRarity = pending.rarity();
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
+                encyclopediaRepository.recordTame(playerUuid, finalMobType, finalRarity));
+
+        // NOW register and activate — triggers onMyPetActivated → applyStats()
+        // which can now find the cached PetData/PetStats
+        registerAndActivate(inactiveMyPet);
 
         // Cleanup any remaining pending tame entries for this player
         pendingMonsterTames.remove(player.getUniqueId());
 
-        player.sendMessage("§a§l敵が仲間になった！");
+        player.sendMessage("§a§l仲間になった！");
 
         return true;
     }
 
     /**
-     * Creates a MyPet from an entity using the MyPet API.
-     * Ported from legacy createMyPet() function.
+     * Creates a MyPet blueprint from an entity WITHOUT registering/activating.
+     * Call {@link #registerAndActivate(InactiveMyPet)} separately after cache data is prepared.
      *
      * @param player  the owning player
      * @param entity  the source entity (used for type and stored info)
@@ -399,23 +510,17 @@ public final class TamingManager {
                                                 @NotNull Entity entity,
                                                 @NotNull String petName) {
         try {
-            // Get or register MyPetPlayer
             var pm = MyPetApi.getPlayerManager();
             MyPetPlayer myPetPlayer = pm.isMyPetPlayer(player)
                     ? pm.getMyPetPlayer(player)
                     : pm.registerMyPetPlayer(player);
 
-            // Create InactiveMyPet blueprint
             InactiveMyPet inactiveMyPet = new InactiveMyPet(myPetPlayer);
 
-            // Set mob type
             MyPetType myPetType = MyPetType.byEntityTypeName(entity.getType().name());
             inactiveMyPet.setPetType(myPetType);
-
-            // Set pet name
             inactiveMyPet.setPetName(petName);
 
-            // Set world group
             WorldGroup wg = WorldGroup.getGroupByWorld(player.getWorld());
             inactiveMyPet.setWorldGroup(wg.getName());
             inactiveMyPet.getOwner().setMyPetForWorldGroup(wg, inactiveMyPet.getUUID());
@@ -425,19 +530,6 @@ public final class TamingManager {
                     .getService(EntityConverterService.class)
                     .ifPresent(service -> inactiveMyPet.setInfo(service.convertEntity((LivingEntity) entity)));
 
-            // Register with MyPet repository and activate
-            MyPetApi.getRepository().addMyPet(inactiveMyPet, new RepositoryCallback<Boolean>() {
-                @Override
-                public void callback(Boolean value) {
-                    var activePet = MyPetApi.getMyPetManager()
-                            .activateMyPet(inactiveMyPet)
-                            .orElse(null);
-                    if (activePet != null) {
-                        activePet.createEntity();
-                    }
-                }
-            });
-
             return inactiveMyPet;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to create MyPet for player " + player.getName(), e);
@@ -446,12 +538,193 @@ public final class TamingManager {
     }
 
     /**
-     * Checks whether an entity type is considered an animal for taming purposes.
+     * Creates a MyPet blueprint from an EntityType WITHOUT registering/activating.
+     * Call {@link #registerAndActivate(InactiveMyPet)} separately after cache data is prepared.
+     *
+     * @param player     the owning player
+     * @param entityType the entity type for the pet
+     * @param petName    the name for the pet
+     * @param entityInfo captured visual info from the original entity (may be null)
+     * @return the created InactiveMyPet, or null on failure
+     */
+    @Nullable
+    public InactiveMyPet createMyPetByType(@NotNull Player player,
+                                            @NotNull EntityType entityType,
+                                            @NotNull String petName,
+                                            @Nullable Object entityInfo) {
+        try {
+            var pm = MyPetApi.getPlayerManager();
+            MyPetPlayer myPetPlayer = pm.isMyPetPlayer(player)
+                    ? pm.getMyPetPlayer(player)
+                    : pm.registerMyPetPlayer(player);
+
+            InactiveMyPet inactiveMyPet = new InactiveMyPet(myPetPlayer);
+
+            MyPetType myPetType = MyPetType.byEntityTypeName(entityType.name());
+            inactiveMyPet.setPetType(myPetType);
+            inactiveMyPet.setPetName(petName);
+
+            // Apply captured entity visual info (color, size, equipment, etc.)
+            if (entityInfo instanceof de.Keyle.MyPet.util.nbt.TagCompound tagCompound) {
+                inactiveMyPet.setInfo(tagCompound);
+            }
+
+            WorldGroup wg = WorldGroup.getGroupByWorld(player.getWorld());
+            inactiveMyPet.setWorldGroup(wg.getName());
+            inactiveMyPet.getOwner().setMyPetForWorldGroup(wg, inactiveMyPet.getUUID());
+
+            return inactiveMyPet;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to create MyPet by type for player " + player.getName(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Registers an InactiveMyPet with the MyPet repository and activates it.
+     * Must be called AFTER all addon data (PetData, PetStats) is cached,
+     * because activation triggers onMyPetActivated → applyStats() which
+     * reads from the cache.
+     */
+    public void registerAndActivate(@NotNull InactiveMyPet inactiveMyPet) {
+        MyPetApi.getRepository().addMyPet(inactiveMyPet, new RepositoryCallback<Boolean>() {
+            @Override
+            public void callback(Boolean value) {
+                var activePet = MyPetApi.getMyPetManager()
+                        .activateMyPet(inactiveMyPet)
+                        .orElse(null);
+                if (activePet != null) {
+                    activePet.createEntity();
+                }
+            }
+        });
+    }
+
+    /**
+     * Refunds a consumed taming item to the player's inventory.
+     * If inventory is full, drops the item at the player's location.
+     */
+    private void refundConsumedItem(@NotNull Player player, @Nullable ItemStack consumedItem) {
+        if (consumedItem == null) {
+            return;
+        }
+        var leftover = player.getInventory().addItem(consumedItem);
+        if (!leftover.isEmpty()) {
+            // Inventory full — drop at player's feet
+            for (ItemStack drop : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), drop);
+            }
+        }
+        player.sendMessage("§7テイミングアイテムを返却しました。");
+    }
+
+    /**
+     * Captures visual entity info (color, size, equipment, etc.) via MyPet's EntityConverterService.
+     * Works on dying entities (EntityDeathEvent) as entity properties are still accessible.
+     */
+    @Nullable
+    private Object captureEntityInfo(@NotNull LivingEntity entity) {
+        try {
+            var serviceOpt = MyPetApi.getServiceManager()
+                    .getService(EntityConverterService.class);
+            if (serviceOpt.isPresent()) {
+                Object result = serviceOpt.get().convertEntity(entity);
+                if (result != null) {
+                    logger.fine("[Taming] Captured entity info for " + entity.getType().name()
+                            + ": " + result);
+                    return result;
+                }
+            }
+        } catch (Exception e) {
+            logger.warning("[Taming] Failed to capture entity info for "
+                    + entity.getType().name() + ": " + e.getMessage());
+        }
+        logger.warning("[Taming] entityInfo is null for " + entity.getType().name()
+                + " (dead=" + entity.isDead() + ")");
+        return null;
+    }
+
+    /**
+     * Copies key visual properties from the original entity to a dummy entity.
+     * Ensures the dummy looks identical to the original during the naming phase.
+     * This covers properties that spawnEntity(type) doesn't preserve.
+     */
+    private void copyEntityProperties(@NotNull LivingEntity original, @NotNull LivingEntity dummy) {
+        try {
+            // Creeper: charged/powered state
+            if (original instanceof Creeper origCreeper && dummy instanceof Creeper dummyCreeper) {
+                dummyCreeper.setPowered(origCreeper.isPowered());
+            }
+            // Zombie: baby state
+            if (original instanceof Zombie origZombie && dummy instanceof Zombie dummyZombie) {
+                dummyZombie.setBaby(origZombie.isBaby());
+            }
+            // Sheep: wool color
+            if (original instanceof Sheep origSheep && dummy instanceof Sheep dummySheep) {
+                dummySheep.setColor(origSheep.getColor());
+            }
+            // Slime/MagmaCube: size
+            if (original instanceof Slime origSlime && dummy instanceof Slime dummySlime) {
+                dummySlime.setSize(origSlime.getSize());
+            }
+            // Wolf: collar color, angry
+            if (original instanceof Wolf origWolf && dummy instanceof Wolf dummyWolf) {
+                dummyWolf.setCollarColor(origWolf.getCollarColor());
+                dummyWolf.setAngry(origWolf.isAngry());
+            }
+            // Ageable: baby state (covers animals like Cow, Pig, etc.)
+            if (original instanceof Ageable origAge && dummy instanceof Ageable dummyAge) {
+                if (!origAge.isAdult()) {
+                    dummyAge.setBaby();
+                }
+            }
+            // Custom name (if any)
+            if (original.getCustomName() != null) {
+                dummy.setCustomName(original.getCustomName());
+                dummy.setCustomNameVisible(original.isCustomNameVisible());
+            }
+        } catch (Exception e) {
+            logger.fine("[Taming] Could not copy some entity properties: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Captures the effective scale of an entity from Attribute.SCALE.
+     * Returns 0.0 if scale is default (1.0) or unavailable, meaning "no custom scale".
+     */
+    private double captureScale(@NotNull LivingEntity entity) {
+        try {
+            AttributeInstance scaleAttr = entity.getAttribute(Attribute.SCALE);
+            if (scaleAttr != null) {
+                double value = scaleAttr.getValue();
+                // Only record non-default scale (default is 1.0)
+                if (Math.abs(value - 1.0) > 1e-6) {
+                    return value;
+                }
+            }
+        } catch (Exception ignored) {}
+        return 0.0;
+    }
+
+    /**
+     * Checks whether an entity type is considered an animal (non-hostile) for taming purposes.
+     * Uses the Enemy interface (Paper 1.19+) to correctly exclude hostile mobs like
+     * Slime, Ghast, Phantom, MagmaCube which don't extend Monster.
+     * Also verifies the type is supported by MyPet and not excluded in config.
      */
     public boolean isAnimal(@NotNull EntityType type) {
+        if (!isSupportedByMyPet(type)) {
+            return false;
+        }
         try {
             Class<?> entityClass = type.getEntityClass();
-            return entityClass != null && Animals.class.isAssignableFrom(entityClass);
+            if (entityClass == null) {
+                return false;
+            }
+            return LivingEntity.class.isAssignableFrom(entityClass)
+                    && !Enemy.class.isAssignableFrom(entityClass)
+                    && !Monster.class.isAssignableFrom(entityClass)
+                    && !org.bukkit.entity.Player.class.isAssignableFrom(entityClass);
         } catch (Exception e) {
             return false;
         }
@@ -459,11 +732,38 @@ public final class TamingManager {
 
     /**
      * Checks whether an entity type is considered a monster for taming purposes.
+     * Uses Enemy interface (Paper 1.19+) to catch Slime, Ghast, Phantom, etc.
+     * that don't extend Monster but are hostile.
+     * Also verifies the type is supported by MyPet and not excluded in config.
      */
     public boolean isMonster(@NotNull EntityType type) {
+        if (!isSupportedByMyPet(type)) {
+            return false;
+        }
         try {
             Class<?> entityClass = type.getEntityClass();
-            return entityClass != null && Monster.class.isAssignableFrom(entityClass);
+            if (entityClass == null) {
+                return false;
+            }
+            return Monster.class.isAssignableFrom(entityClass)
+                    || Enemy.class.isAssignableFrom(entityClass);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether an entity type is supported by MyPet and not excluded in config.
+     * MyPetType.byEntityTypeName throws MyPetTypeNotFoundException for unsupported types,
+     * and also checks Minecraft version compatibility.
+     */
+    private boolean isSupportedByMyPet(@NotNull EntityType type) {
+        if (configManager.getTamingExcludedTypes().contains(type.name())) {
+            return false;
+        }
+        try {
+            MyPetType.byEntityTypeName(type.name());
+            return true;
         } catch (Exception e) {
             return false;
         }
@@ -478,6 +778,24 @@ public final class TamingManager {
     }
 
     // ─── Internal ────────────────────────────────────────────────
+
+    /**
+     * Checks whether the given entity is already claimed by another player
+     * (pending monster tame or pending name assignment).
+     */
+    private boolean isEntityClaimedByOther(@NotNull Entity entity, @NotNull UUID playerUuid) {
+        for (Map.Entry<UUID, PendingTame> entry : pendingMonsterTames.entrySet()) {
+            if (!entry.getKey().equals(playerUuid) && entry.getValue().entity().equals(entity)) {
+                return true;
+            }
+        }
+        for (Map.Entry<UUID, PendingName> entry : pendingNames.entrySet()) {
+            if (!entry.getKey().equals(playerUuid) && entry.getValue().dummyEntity().equals(entity)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Finds the first matching taming item entry for the given hand item.
@@ -511,6 +829,29 @@ public final class TamingManager {
             boolean isDead = pending.entity().isDead() || !pending.entity().isValid();
             return isStale || isDead;
         });
+
+        // Clean up taming attempts for dead/despawned entities
+        tamingAttempts.keySet().removeIf(uuid -> {
+            Entity entity = org.bukkit.Bukkit.getServer().getEntity(uuid);
+            return entity == null || entity.isDead() || !entity.isValid();
+        });
+    }
+
+    /**
+     * Finds the player who registered a pending tame for the given entity.
+     * Used to allow taming regardless of death cause (player kill, pet kill, fall, etc.).
+     *
+     * @param entity the dying entity
+     * @return the player who used a taming item on this entity, or null if not pending
+     */
+    @Nullable
+    public Player findPendingTameOwner(@NotNull LivingEntity entity) {
+        for (Map.Entry<UUID, PendingTame> entry : pendingMonsterTames.entrySet()) {
+            if (entry.getValue().entity().equals(entity)) {
+                return Bukkit.getPlayer(entry.getKey());
+            }
+        }
+        return null;
     }
 
     /**

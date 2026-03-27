@@ -1,0 +1,93 @@
+{
+  "Order": 42,
+  "Description": [
+    "- <red><bold>狂暴の猪 (超高ダメージ)",
+    "- <red><bold>突進ノックバック",
+    "- <red><bold>トゲの鎧",
+    "- <green><bold>高HP"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+4"
+        },
+        "10": {
+          "Damage": "+4"
+        },
+        "25": {
+          "Damage": "+4"
+        },
+        "42": {
+          "Damage": "+4"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "5": {
+          "Chance": "+39"
+        },
+        "30": {
+          "Chance": "+26"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "15": {
+          "Reflection": "+25",
+          "Chance": "+32"
+        },
+        "50": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "20": {
+          "Health": "+6"
+        },
+        "35": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "20": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ZOGLIN"
+  ],
+  "ID": "BerserkBoar",
+  "Icon": {
+    "Material": "crimson_fungus",
+    "Glowing": true
+  },
+  "Name": "バーサークボア"
+}

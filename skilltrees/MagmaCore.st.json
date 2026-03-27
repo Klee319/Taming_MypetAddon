@@ -1,0 +1,107 @@
+{
+  "Order": 45,
+  "Description": [
+    "- <red><bold>マグマの核 (炎上 + トゲ)",
+    "- <green><bold>溶岩の再生 (HP大量増加)",
+    "- <red><bold>炎の鎧",
+    "- <green><bold>高速回復"
+  ],
+  "Skills": {
+    "Fire": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+5",
+          "Chance": "+46"
+        },
+        "20": {
+          "Duration": "+4",
+          "Chance": "+26"
+        },
+        "42": {
+          "Duration": "+3",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "5": {
+          "Reflection": "+25",
+          "Chance": "+39"
+        },
+        "30": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "10": {
+          "Health": "+6"
+        },
+        "25": {
+          "Health": "+6"
+        },
+        "50": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+25",
+          "Health": "+5"
+        },
+        "35": {
+          "Health": "+3"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "20": {
+          "Damage": "+2"
+        },
+        "42": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "30": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "MagmaCube"
+  ],
+  "ID": "MagmaCore",
+  "Icon": {
+    "Material": "magma_cream",
+    "Glowing": true
+  },
+  "Name": "マグマコア"
+}

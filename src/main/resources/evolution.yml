@@ -1,0 +1,259 @@
+# ============================================================================
+#  MyPetAddon - 進化設定
+#  ペットの進化先（分岐進化対応）、進化条件、ステータスボーナスを定義します。
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+# 各モブタイプに branches で複数の進化先を定義可能。
+# fixed-skilltree: 進化時に固定で割り当てるスキルツリー名
+#   (plugins/MyPet/skilltrees/ にある .st.json のファイル名)
+#   空欄の場合は現在のスキルツリーを引き継ぎます。
+# conditions: 進化条件（すべて満たす必要あり）
+# stat-bonus: 進化時の基礎ステータス倍率ボーナス（1.15 = +15%）
+evolutions:
+
+  # ─── ゾンビ → ハスク / ドラウンド / 村人ゾンビ ───
+  ZOMBIE:
+    branches:
+      husk:
+        display-name: "§eハスク"
+        target: "HUSK"
+        fixed-skilltree: "DesertWrath"
+        conditions:
+          min-level: 20
+          min-bond-level: 3
+          required-biome: "DESERT"
+          required-item: "GOLDEN_APPLE"
+          required-item-amount: 1
+        stat-bonus:
+          Life: 1.15
+          Damage: 1.10
+      drowned:
+        display-name: "§bドラウンド"
+        target: "DROWNED"
+        fixed-skilltree: "TidalDread"
+        conditions:
+          min-level: 20
+          min-bond-level: 3
+          required-biome: "OCEAN"
+          required-item: "HEART_OF_THE_SEA"
+          required-item-amount: 1
+        stat-bonus:
+          Life: 1.10
+          Damage: 1.20
+      zombie_villager:
+        display-name: "§a村人ゾンビ"
+        target: "ZOMBIE_VILLAGER"
+        fixed-skilltree: "PlagueBringer"
+        conditions:
+          min-level: 25
+          min-bond-level: 4
+          required-biome: ""
+          required-item: "EMERALD"
+          required-item-amount: 10
+        stat-bonus:
+          Life: 1.10
+          Damage: 1.05
+
+  # ─── スケルトン → ウィザースケルトン / ボグド / ストレイ / パーチド ───
+  SKELETON:
+    branches:
+      wither_skeleton:
+        display-name: "§8ウィザースケルトン"
+        target: "WITHER_SKELETON"
+        fixed-skilltree: "WitherWrath"
+        conditions:
+          min-level: 30
+          min-bond-level: 4
+          required-biome: "NETHER"
+          required-item: "WITHER_SKELETON_SKULL"
+          required-item-amount: 1
+        stat-bonus:
+          Life: 1.25
+          Damage: 1.20
+      bogged:
+        display-name: "§2ボグド"
+        target: "BOGGED"
+        fixed-skilltree: "SwampToxin"
+        conditions:
+          min-level: 20
+          min-bond-level: 3
+          required-biome: "SWAMP"
+          required-item: "POISONOUS_POTATO"
+          required-item-amount: 5
+        stat-bonus:
+          Life: 1.10
+          Damage: 1.15
+      stray:
+        display-name: "§fストレイ"
+        target: "STRAY"
+        fixed-skilltree: "FrostArrow"
+        conditions:
+          min-level: 20
+          min-bond-level: 3
+          required-biome: "SNOWY"
+          required-item: "PACKED_ICE"
+          required-item-amount: 3
+        stat-bonus:
+          Life: 1.15
+          Damage: 1.10
+  # ─── シルバーフィッシュ → エンダーマイト ───
+  SILVERFISH:
+    branches:
+      endermite:
+        display-name: "§5エンダーマイト"
+        target: "ENDERMITE"
+        fixed-skilltree: "VoidBite"
+        conditions:
+          min-level: 25
+          min-bond-level: 3
+          required-biome: ""
+          required-item: "ENDER_PEARL"
+          required-item-amount: 5
+        stat-bonus:
+          Life: 1.20
+          Damage: 1.30
+
+  # ─── 馬 → ゾンビホース / スケルトンホース ───
+  HORSE:
+    branches:
+      zombie_horse:
+        display-name: "§2ゾンビホース"
+        target: "ZOMBIE_HORSE"
+        fixed-skilltree: "CursedSteed"
+        conditions:
+          min-level: 25
+          min-bond-level: 3
+          required-biome: ""
+          required-item: "ROTTEN_FLESH"
+          required-item-amount: 32
+        stat-bonus:
+          Life: 1.20
+          Damage: 1.15
+      skeleton_horse:
+        display-name: "§fスケルトンホース"
+        target: "SKELETON_HORSE"
+        fixed-skilltree: "BoneSteed"
+        conditions:
+          min-level: 25
+          min-bond-level: 3
+          required-biome: ""
+          required-item: "BONE"
+          required-item-amount: 16
+        stat-bonus:
+          Life: 1.15
+          Damage: 1.10
+
+  # ─── ピリジャー → ウィンディケーター（一段階目） ───
+  PILLAGER:
+    branches:
+      vindicator:
+        display-name: "§cウィンディケーター"
+        target: "VINDICATOR"
+        fixed-skilltree: "RaidCaptain"
+        conditions:
+          min-level: 25
+          min-bond-level: 3
+          required-biome: ""
+          required-item: "IRON_AXE"
+          required-item-amount: 1
+        stat-bonus:
+          Life: 1.15
+          Damage: 1.20
+
+  # ─── ウィンディケーター → エヴォーカー（二段階目） ───
+  VINDICATOR:
+    branches:
+      evoker:
+        display-name: "§dエヴォーカー"
+        target: "EVOKER"
+        fixed-skilltree: "DarkSorcerer"
+        conditions:
+          min-level: 35
+          min-bond-level: 4
+          required-biome: ""
+          required-item: "TOTEM_OF_UNDYING"
+          required-item-amount: 1
+        stat-bonus:
+          Life: 1.20
+          Damage: 1.25
+
+  # ─── ホグリン → ゾグリン ───
+  HOGLIN:
+    branches:
+      zoglin:
+        display-name: "§cゾグリン"
+        target: "ZOGLIN"
+        fixed-skilltree: "BerserkBoar"
+        conditions:
+          min-level: 25
+          min-bond-level: 3
+          required-biome: "NETHER"
+          required-item: "CRIMSON_FUNGUS"
+          required-item-amount: 10
+        stat-bonus:
+          Life: 1.30
+          Damage: 1.15
+
+  # ─── ピグリン → ゾンビピグリン / ピグリンブルート ───
+  PIGLIN:
+    branches:
+      zombified_piglin:
+        display-name: "§eゾンビピグリン"
+        target: "ZOMBIFIED_PIGLIN"
+        fixed-skilltree: "GoldenUndead"
+        conditions:
+          min-level: 20
+          min-bond-level: 3
+          required-biome: ""
+          required-item: "GOLD_INGOT"
+          required-item-amount: 16
+        stat-bonus:
+          Life: 1.20
+          Damage: 1.15
+      piglin_brute:
+        display-name: "§6ピグリンブルート"
+        target: "PIGLIN_BRUTE"
+        fixed-skilltree: "BruteForce"
+        conditions:
+          min-level: 30
+          min-bond-level: 4
+          required-biome: "NETHER"
+          required-item: "GOLD_BLOCK"
+          required-item-amount: 3
+        stat-bonus:
+          Life: 1.15
+          Damage: 1.25
+
+  # ─── スライム → マグマキューブ ───
+  SLIME:
+    branches:
+      magma_cube:
+        display-name: "§cマグマキューブ"
+        target: "MAGMA_CUBE"
+        fixed-skilltree: "MagmaCore"
+        conditions:
+          min-level: 20
+          min-bond-level: 3
+          required-biome: "NETHER"
+          required-item: "MAGMA_CREAM"
+          required-item-amount: 10
+        stat-bonus:
+          Life: 1.15
+          Damage: 1.15
+
+  # ─── スパイダー → ケイブスパイダー ───
+  SPIDER:
+    branches:
+      cave_spider:
+        display-name: "§2ケイブスパイダー"
+        target: "CAVE_SPIDER"
+        fixed-skilltree: "DeepVenom"
+        conditions:
+          min-level: 15
+          min-bond-level: 2
+          required-biome: ""
+          required-item: "FERMENTED_SPIDER_EYE"
+          required-item-amount: 3
+        stat-bonus:
+          Life: 1.05
+          Damage: 1.25

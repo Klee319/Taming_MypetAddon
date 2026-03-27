@@ -2,7 +2,10 @@
 #  MyPetAddon - メイン設定ファイル
 #  プラグインバージョン: ${version}
 #
-#  このファイルではプラグインの全機能を細かく設定できます。
+#  このファイルではプラグインの全般設定を管理します。
+#  各機能の詳細設定は個別ファイルに分割されています:
+#    rarity.yml, personality.yml, bond.yml, stats.yml,
+#    evolution.yml, skilltree.yml, equipment.yml, messages.yml
 #  変更後は /mypetaddon reload で反映してください。
 # ============================================================================
 
@@ -27,7 +30,7 @@ taming:
     # consume: テイミング試行時にアイテムを消費するか
     items:
       - item: "GOLDEN_APPLE"
-        success-rate: 1.0
+        success-rate: 0.05
         consume: true
       - item: "ENCHANTED_GOLDEN_APPLE"
         success-rate: 1.0
@@ -45,27 +48,43 @@ taming:
     # item: マテリアル名（例: "NETHER_STAR"）または "base64:<エンコード済みItemStack>"
     # success-rate: 成功率（0.0〜1.0、1.0 = 100%）
     # consume: テイミング試行時にアイテムを消費するか
+    # ※ 動物用アイテムと重複させないこと（動物ルートが優先されるため）
     items:
-      - item: "NETHER_STAR"
+      - item: "DIAMOND"
+        success-rate: 0.05
+        consume: true
+      - item: "ENCHANTED_GOLDEN_APPLE"
         success-rate: 1.0
         consume: true
     # 名前入力の待機時間 (秒)
-    naming-timeout: 30
+    naming-timeout: 60
     # 名前入力に使用するコマンド
-    naming-command: "/petname"
+    naming-command: "/pettame"
     # プレイヤーごとにテイミング対象を1体に制限するか
     single-target-per-player: true
 
+  # --- テイミング試行回数制限 ---
+  # 1体のモブに対してテイムアイテムを使える最大回数（0 = 無制限）
+  # 例: 10 の場合、10回失敗したらそのモブにはテイムアイテムを使えなくなる
+  max-attempts-per-mob: 5
+
   # --- テイミング除外リスト ---
   # ここに記載したモブタイプはテイミング不可になります
+  # ※シュルカーはデフォルト不可
   excluded-types:
     - "ENDER_DRAGON"
-    - "ELDER_GUARDIAN"
-    - "IRON_GOLEM"
-    - "SNOW_GOLEM"
     - "VILLAGER"
     - "WANDERING_TRADER"
-    - "BAT"
+    - "SHULKER"
+
+  # --- ペットスケール(サイズ)オーバーライド ---
+  # テイム後のペットの大きさを変更する設定
+  # モブタイプ名: スケール値（1.0 = 通常サイズ、0.7 = 70%サイズ）
+  # Attribute.SCALE を使用（Paper 1.20.5+）
+  scale-overrides:
+    WITHER: 0.7
+    ELDER_GUARDIAN: 0.7
+    GHAST: 0.5
 
   # --- MythicMobs 除外設定 ---
   mythicmobs-exclusion:
@@ -75,401 +94,26 @@ taming:
     excluded-ids: []
 
 # --------------------------------------------------------------------------
-# 3. レアリティ設定
+# 6.5. レベルボーナス設定
 # --------------------------------------------------------------------------
-rarity:
-  # --- レアリティティア定義 ---
-  tiers:
-    COMMON:
-      color: "§f"
-      stat-multiplier: 1.0
-      skill-slots: 1
-      particle: ""
-      particle-interval: 0
-      awakening: false
-    UNCOMMON:
-      color: "§a"
-      stat-multiplier: 1.15
-      skill-slots: 2
-      particle: ""
-      particle-interval: 0
-      awakening: false
-    RARE:
-      color: "§9"
-      stat-multiplier: 1.35
-      skill-slots: 3
-      particle: "HAPPY_VILLAGER"
-      particle-interval: 40
-      awakening: false
-    EPIC:
-      color: "§5"
-      stat-multiplier: 1.6
-      skill-slots: 4
-      particle: "WITCH"
-      particle-interval: 30
-      awakening: true
-    LEGENDARY:
-      color: "§6"
-      stat-multiplier: 2.0
-      skill-slots: 5
-      particle: "TOTEM_OF_UNDYING"
-      particle-interval: 20
-      awakening: true
-    MYTHIC:
-      color: "§d"
-      stat-multiplier: 2.5
-      skill-slots: 6
-      particle: "DRAGON_BREATH"
-      particle-interval: 10
-      awakening: true
-
-  # --- レベル帯ごとのレアリティ重み ---
-  # LevelledMobs のレベルに基づいてレアリティが決定されます
-  # 各レアリティの重みが高いほど選ばれやすくなります
-  level-ranges:
-    "1-10":
-      COMMON: 60
-      UNCOMMON: 25
-      RARE: 10
-      EPIC: 4
-      LEGENDARY: 1
-      MYTHIC: 0
-    "11-25":
-      COMMON: 35
-      UNCOMMON: 30
-      RARE: 20
-      EPIC: 10
-      LEGENDARY: 4
-      MYTHIC: 1
-    "26-50":
-      COMMON: 15
-      UNCOMMON: 25
-      RARE: 25
-      EPIC: 20
-      LEGENDARY: 10
-      MYTHIC: 5
-    "51+":
-      COMMON: 5
-      UNCOMMON: 10
-      RARE: 20
-      EPIC: 30
-      LEGENDARY: 20
-      MYTHIC: 15
-
-  # LevelledMobs が導入されていない場合のフォールバック重み
-  no-levelledmobs-fallback:
-    COMMON: 40
-    UNCOMMON: 25
-    RARE: 18
-    EPIC: 10
-    LEGENDARY: 5
-    MYTHIC: 2
-
-  # --- 環境ボーナス ---
-  # 特定の環境条件でレアリティの出現率にボーナスが付きます
-  # 値はレアリティ判定時に上位ティアの重みに加算されるポイント
-  environment-bonuses:
-    # 満月の夜
-    full-moon: 5
-    # 雷雨
-    thunderstorm: 8
-    # ディープダークバイオーム
-    deep-dark-biome: 12
-    # エンドディメンション
-    end-dimension: 10
-    # ネザー要塞
-    nether-fortress: 7
-    # ボーナスの累積上限
-    max-bonus-cap: 20
-
-# --------------------------------------------------------------------------
-# 4. 性格設定
-# --------------------------------------------------------------------------
-personalities:
-  BRAVE:
-    display-name: "勇敢"
-    description: "戦闘で恐れを知らず、攻撃力が上昇する"
-    modifiers:
-      damage: 1.10
-      health: 0.95
-    custom-effects:
-      aggroRange: 1.2
-    weight: 20
-
-  STURDY:
-    display-name: "頑強"
-    description: "タフで打たれ強く、ダメージを吸収する"
-    modifiers:
-      health: 1.15
-      damage: 0.95
-    custom-effects:
-      knockbackResist: 1.3
-    weight: 20
-
-  AGILE:
-    display-name: "俊敏"
-    description: "素早い身のこなしで攻撃を回避する"
-    modifiers:
-      speed: 1.15
-      health: 0.90
-    custom-effects:
-      dodgeChance: 0.08
-    weight: 18
-
-  LOYAL:
-    display-name: "忠誠"
-    description: "深い絆を持ち、信頼を早く獲得する"
-    modifiers:
-      health: 1.05
-    custom-effects:
-      bondExpMultiplier: 1.25
-    weight: 18
-
-  FIERCE:
-    display-name: "獰猛"
-    description: "壊滅的なクリティカルストライクを放つ"
-    modifiers:
-      damage: 1.20
-      health: 0.90
-      speed: 0.95
-    custom-effects:
-      critChance: 0.10
-    weight: 12
-
-  CAUTIOUS:
-    display-name: "慎重"
-    description: "注意深く、不意を突かれることが少ない"
-    modifiers:
-      health: 1.10
-      speed: 1.05
-      damage: 0.90
-    custom-effects:
-      threatDetectRange: 1.5
-    weight: 12
-
-  LUCKY:
-    display-name: "幸運"
-    description: "幸運に恵まれた仲間"
-    modifiers: {}
-    custom-effects:
-      lootBonusChance: 0.15
-      rareDropMultiplier: 1.3
-    weight: 5
-
-  GENIUS:
-    display-name: "天才"
-    description: "明晰な頭脳でスキルを素早く習得する"
-    modifiers:
-      damage: 1.05
-    custom-effects:
-      skillExpMultiplier: 1.30
-      skillCooldownReduction: 0.10
-    weight: 5
-
-# --------------------------------------------------------------------------
-# 5. 絆 (Bond) 設定
-# --------------------------------------------------------------------------
-bond:
-  # --- 絆レベル定義 ---
-  levels:
-    1:
-      min: 0
-      max: 99
-      bonus: "なし"
-    2:
-      min: 100
-      max: 299
-      bonus: "ステータス +5%"
-    3:
-      min: 300
-      max: 599
-      bonus: "ステータス +10%, スキルクールダウン -10%"
-    4:
-      min: 600
-      max: 999
-      bonus: "ステータス +15%, スキルクールダウン -15%, 経験値ボーナス +10%"
-    5:
-      min: 1000
-      max: 9999
-      bonus: "ステータス +25%, スキルクールダウン -20%, 経験値ボーナス +20%, 特殊スキル解放"
-
-  # --- 絆経験値の獲得量 ---
-  gain:
-    # 戦闘でモブを倒した時
-    combat-kill: 5
-    # ペットにエサを与えた時
-    feeding: 3
-    # ログイン時にペットを召喚した時
-    login-summon: 2
-    # ペットに騎乗中 (1分あたり)
-    riding-per-minute: 1
-
-  # --- 絆経験値の減少 ---
-  loss:
-    # 日次の自然減少量
-    daily-decay: 2
-    # ペットが死亡した時の減少量
-    pet-death: 20
-    # オフライン中の最大累積減少量
-    max-offline-decay: 50
-
-  # --- デバウンス設定 ---
-  # 短時間に連続して獲得されることを防ぐクールダウン (ミリ秒)
-  debounce:
-    combat-kill-cooldown: 5000
-    feeding-cooldown: 10000
-
-# --------------------------------------------------------------------------
-# 6. ペット基本ステータス
-# --------------------------------------------------------------------------
-pet-base-values:
-  # --- ティア1: 弱い一般モブ ---
-  tier-1:
-    types:
-      - "CHICKEN"
-      - "RABBIT"
-      - "COD"
-      - "SALMON"
-      - "TROPICAL_FISH"
-      - "PUFFERFISH"
-      - "BAT"
-      - "SILVERFISH"
-    stats:
-      Life:
-        min: 10.0
-        max: 20.0
-      Damage:
-        min: 1.0
-        max: 3.0
-
-  # --- ティア2: 一般的な動物 ---
-  tier-2:
-    types:
-      - "PIG"
-      - "COW"
-      - "SHEEP"
-      - "HORSE"
-      - "DONKEY"
-      - "MULE"
-      - "LLAMA"
-      - "CAT"
-      - "WOLF"
-      - "FOX"
-      - "OCELOT"
-      - "PARROT"
-      - "TURTLE"
-      - "FROG"
-      - "GOAT"
-      - "CAMEL"
-      - "SNIFFER"
-      - "ARMADILLO"
-    stats:
-      Life:
-        min: 20.0
-        max: 40.0
-      Damage:
-        min: 2.0
-        max: 5.0
-
-  # --- ティア3: 一般的な敵対モブ ---
-  tier-3:
-    types:
-      - "ZOMBIE"
-      - "SKELETON"
-      - "SPIDER"
-      - "CREEPER"
-      - "SLIME"
-      - "ENDERMAN"
-      - "CAVE_SPIDER"
-      - "DROWNED"
-      - "HUSK"
-      - "STRAY"
-      - "PHANTOM"
-      - "PILLAGER"
-      - "VINDICATOR"
-      - "WITCH"
-      - "MAGMA_CUBE"
-      - "HOGLIN"
-      - "PIGLIN"
-      - "PIGLIN_BRUTE"
-      - "ZOMBIFIED_PIGLIN"
-    stats:
-      Life:
-        min: 30.0
-        max: 60.0
-      Damage:
-        min: 4.0
-        max: 8.0
-
-  # --- ティア4: 強力な敵対モブ ---
-  tier-4:
-    types:
-      - "BLAZE"
-      - "GHAST"
-      - "WITHER_SKELETON"
-      - "EVOKER"
-      - "RAVAGER"
-      - "GUARDIAN"
-      - "SHULKER"
-      - "VEX"
-      - "BREEZE"
-    stats:
-      Life:
-        min: 50.0
-        max: 100.0
-      Damage:
-        min: 6.0
-        max: 14.0
-
-  # --- ティア5: ボス級モブ ---
-  tier-5:
-    types:
-      - "ELDER_GUARDIAN"
-      - "WARDEN"
-      - "WITHER"
-    stats:
-      Life:
-        min: 100.0
-        max: 200.0
-      Damage:
-        min: 12.0
-        max: 25.0
-
-  # --- 特殊ティア: 個別調整が必要なモブ ---
-  special:
-    wither:
-      types:
-        - "WITHER"
-      stats:
-        Life:
-          min: 150.0
-          max: 300.0
-        Damage:
-          min: 15.0
-          max: 30.0
-
-    warden:
-      types:
-        - "WARDEN"
-      stats:
-        Life:
-          min: 200.0
-          max: 400.0
-        Damage:
-          min: 20.0
-          max: 40.0
-
-    wolf-bee:
-      types:
-        - "WOLF"
-        - "BEE"
-      stats:
-        Life:
-          min: 25.0
-          max: 50.0
-        Damage:
-          min: 3.0
-          max: 7.0
+# MyPetのレベルが一定以上になると、全ステータスにボーナスが付きます。
+# 例: start-level: 20, per-level-bonus: 0.005 の場合
+#   LV21 = +0.5%, LV30 = +5%, LV50 = +15%, LV70 = +25%(上限)
+level-bonuses:
+  enabled: true
+  # MyPetの経験値獲得倍率（1.0 = 通常、0.7 = 30%減少）
+  # 値を下げるとレベル上げが難しくなります
+  exp-multiplier: 0.7
+  # ボーナスが発生し始めるレベル
+  start-level: 20
+  # レベルごとのボーナス倍率（0.00625 = +0.625%/Lv）
+  # LV100で最大+50%（1.5倍）に到達する設計
+  per-level-bonus: 0.00625
+  # ボーナスの上限（0.50 = +50% = 最終的に1.5倍）
+  max-bonus: 0.50
+  # 経験値減少を防止する（true = ペット死亡やバグによる経験値ロスを完全にブロック）
+  # サーバー出入りでレベルが下がる問題が発生する場合はtrueにしてください
+  prevent-exp-loss: true
 
 # --------------------------------------------------------------------------
 # 7. リロールアイテム設定
@@ -477,208 +121,22 @@ pet-base-values:
 reroll-items:
   # リロールアイテムリスト（複数指定可）
   # item: マテリアル名または "base64:<エンコード済みItemStack>"
-  # type: アイテムの用途（reroll = レアリティ再抽選, upgrade = レアリティアップグレード, skilltree = スキルツリー再抽選, stat-add = 基礎ステータス+1）
+  # type: アイテムの用途（reroll = 基礎ステータス再抽選, upgrade = レアリティアップグレード, skilltree = スキルツリー再抽選, stat-add = 基礎ステータス+1）
   # success-rate: 成功率（0.0〜1.0、1.0 = 100%）
   # consume: 使用時にアイテムを消費するか
   items:
-    - item: "AMETHYST_SHARD"
+    - item: "REDSTONE_BLOCK"
       type: "reroll"
-      success-rate: 1.0
+      success-rate: 0.05
       consume: true
     - item: "NETHER_STAR"
-      type: "upgrade"
-      success-rate: 0.5
-      consume: true
-    - item: "ECHO_SHARD"
-      type: "skilltree"
+      type: "stat-add"
       success-rate: 1.0
       consume: true
-
-# --------------------------------------------------------------------------
-# 8. 進化設定
-# --------------------------------------------------------------------------
-evolutions:
-  ZOMBIE:
-    target: "HUSK"
-    conditions:
-      # 進化に必要な最低レベル
-      min-level: 20
-      # 進化に必要な最低絆レベル
-      min-bond-level: 3
-      # 必要なバイオーム (空の場合は制限なし)
-      required-biome: "DESERT"
-      # 進化に必要な消費アイテム
-      required-item: "GOLDEN_APPLE"
-      # アイテムの必要個数
-      required-item-amount: 1
-    stat-bonus:
-      Life: 1.15
-      Damage: 1.10
-
-  HUSK:
-    target: "DROWNED"
-    conditions:
-      min-level: 35
-      min-bond-level: 4
-      required-biome: "OCEAN"
-      required-item: "HEART_OF_THE_SEA"
-      required-item-amount: 1
-    stat-bonus:
-      Life: 1.20
-      Damage: 1.15
-
-  SKELETON:
-    target: "WITHER_SKELETON"
-    conditions:
-      min-level: 30
-      min-bond-level: 4
-      required-biome: "NETHER_WASTES"
-      required-item: "WITHER_SKELETON_SKULL"
-      required-item-amount: 1
-    stat-bonus:
-      Life: 1.25
-      Damage: 1.20
-
-  SPIDER:
-    target: "CAVE_SPIDER"
-    conditions:
-      min-level: 15
-      min-bond-level: 2
-      required-biome: ""
-      required-item: "FERMENTED_SPIDER_EYE"
-      required-item-amount: 3
-    stat-bonus:
-      Life: 1.05
-      Damage: 1.25
-
-# --------------------------------------------------------------------------
-# 9. スキルツリー自動割り当て設定
-# --------------------------------------------------------------------------
-# テイム時にスキルツリーを自動的に割り当てます。
-# 優先度: per-rarity > per-mob > default > MyPet組み込みランダム
-# skilltree: MyPetに登録されているスキルツリー名（skilltrees/*.st.json の名前）
-# weight: 選出重み（大きいほど選ばれやすい）
-#
-# MyPet標準のスキルツリー: Combat, Farm, PvP, Ride, Utility
-# カスタムスキルツリーは plugins/MyPet/skilltrees/ に追加してください
-skilltree-assignment:
-  # --- デフォルト（特定の指定がない場合） ---
-  default:
-    - skilltree: "Combat"
-      weight: 30
-    - skilltree: "Utility"
-      weight: 25
-    - skilltree: "Farm"
-      weight: 20
-    - skilltree: "Ride"
-      weight: 15
-    - skilltree: "PvP"
-      weight: 10
-
-  # --- レアリティ別オーバーライド（上位レアリティに強力なツリーを） ---
-  # per-rarity:
-  #   MYTHIC:
-  #     - skilltree: "Combat"
-  #       weight: 50
-  #     - skilltree: "PvP"
-  #       weight: 50
-  #   LEGENDARY:
-  #     - skilltree: "Combat"
-  #       weight: 40
-  #     - skilltree: "PvP"
-  #       weight: 30
-  #     - skilltree: "Utility"
-  #       weight: 30
-
-  # --- モブタイプ別オーバーライド ---
-  # per-mob:
-  #   WOLF:
-  #     - skilltree: "Combat"
-  #       weight: 60
-  #     - skilltree: "Ride"
-  #       weight: 40
-  #   HORSE:
-  #     - skilltree: "Ride"
-  #       weight: 80
-  #     - skilltree: "Farm"
-  #       weight: 20
-
-# --------------------------------------------------------------------------
-# 10. 装備設定
-# --------------------------------------------------------------------------
-equipment:
-  # 利用可能な装備スロット
-  slots:
-    - "HEAD"
-    - "CHEST"
-    - "LEGS"
-    - "FEET"
-    - "WEAPON"
-    - "ACCESSORY"
-
-  # ステータスのみ適用 (true = 見た目は変更しない)
-  stat-only: true
-
-# --------------------------------------------------------------------------
-# 11. 図鑑 (Encyclopedia) 設定
-# --------------------------------------------------------------------------
-encyclopedia:
-  gui:
-    # GUI タイトル
-    title: "§8§lペット図鑑"
-    # GUI の行数 (1-6)
-    rows: 6
-    # ソート方法 (NAME, RARITY, BOND_LEVEL, TAME_DATE)
-    sort: "NAME"
-
-  # --- コンプリート報酬 ---
-  completion-rewards:
-    25:
-      # 25% 達成時の報酬コマンド (%player% はプレイヤー名に置換)
-      commands:
-        - "give %player% diamond 5"
-      message: "§a図鑑25%%達成！ダイヤモンド5個を獲得しました！"
-    50:
-      commands:
-        - "give %player% emerald 10"
-        - "give %player% golden_apple 3"
-      message: "§a図鑑50%%達成！エメラルド10個と金リンゴ3個を獲得しました！"
-    75:
-      commands:
-        - "give %player% nether_star 1"
-        - "give %player% enchanted_golden_apple 1"
-      message: "§6図鑑75%%達成！ネザースターとエンチャント金リンゴを獲得しました！"
-    100:
-      commands:
-        - "give %player% nether_star 3"
-        - "give %player% elytra 1"
-        - "give %player% totem_of_undying 1"
-      message: "§d§l図鑑100%%達成！伝説の報酬を獲得しました！"
-
-# --------------------------------------------------------------------------
-# 12. サウンド設定
-# --------------------------------------------------------------------------
-sounds:
-  # テイミング成功
-  tame-success:
-    sound: "ENTITY_PLAYER_LEVELUP"
-    volume: 1.0
-    pitch: 1.2
-  # モンスターテイミング準備完了
-  tame-monster-ready:
-    sound: "BLOCK_NOTE_BLOCK_CHIME"
-    volume: 1.0
-    pitch: 1.5
-  # 進化成功
-  evolution-success:
-    sound: "UI_TOAST_CHALLENGE_COMPLETE"
-    volume: 1.0
-    pitch: 1.0
-  # レアリティアップグレード
-  rarity-upgrade:
-    sound: "ENTITY_ENDER_DRAGON_GROWL"
-    volume: 1.0
-    pitch: 1.5
+    - item: "COPPER_BLOCK"
+      type: "skilltree"
+      success-rate: 0.01
+      consume: true
 
 # --------------------------------------------------------------------------
 # 13. LevelledMobs 連携設定
@@ -686,89 +144,3 @@ sounds:
 levelledmobs:
   # LevelledMobs が使用する PersistentDataContainer のキー
   pdc-key: "level"
-
-# --------------------------------------------------------------------------
-# 14. メッセージ設定
-# --------------------------------------------------------------------------
-messages:
-  # --- プレフィックス ---
-  prefix: "§8[§bMyPet§eAddon§8]§r "
-
-  # --- テイミング ---
-  tame-success: "§a%pet_name% §7をテイミングしました！ (レアリティ: %rarity%, 性格: %personality%)"
-  tame-fail: "§cテイミングに失敗しました..."
-  tame-fail-rate: "§cテイミングに失敗しました... (成功率: §f%rate%%§c)"
-  tame-excluded: "§cこのモブはテイミングできません。"
-  tame-monster-start: "§eモンスターテイミングを開始しました。§f%timeout%秒§e以内にチャットで名前を入力してください。"
-  tame-monster-naming: "§aペットの名前を入力してください (§f%command%§a を使用)"
-  tame-monster-timeout: "§c名前入力の時間切れです。テイミングがキャンセルされました。"
-  tame-already-targeting: "§c既に別のモブをテイミング中です。"
-  tame-mythicmob-blocked: "§cこのMythicMobはテイミングできません。"
-
-  # --- レアリティ ---
-  rarity-display: "§7レアリティ: %rarity_colored%"
-  rarity-upgrade-success: "§6レアリティが §r%old_rarity% §6から §r%new_rarity% §6にアップグレードしました！"
-  rarity-upgrade-fail: "§cレアリティのアップグレードに失敗しました。"
-  rarity-already-max: "§cこのペットは既に最高レアリティです。"
-  rarity-reroll-success: "§eレアリティを再抽選しました！ 結果: %rarity_colored%"
-
-  # --- 性格 ---
-  personality-display: "§7性格: §f%personality_name% §8- §7%personality_desc%"
-
-  # --- 絆 ---
-  bond-level-up: "§d%pet_name% §7との絆がレベル §f%bond_level% §7に上がりました！ ボーナス: §f%bond_bonus%"
-  bond-display: "§7絆レベル: §f%bond_level% §8(§7%bond_exp%/%bond_next%§8)"
-  bond-decay-warning: "§e長い間ペットと触れ合っていません。絆が少し下がりました。"
-  bond-pet-death: "§c%pet_name% が倒されました。絆が §f%bond_loss% §c減少しました。"
-
-  # --- 進化 ---
-  evolution-available: "§6%pet_name% は進化条件を満たしています！ §e/pet evolve §6で進化させましょう。"
-  evolution-success: "§d§l%pet_name% が %target_type% に進化しました！"
-  evolution-fail-level: "§c進化にはレベル §f%required_level% §c以上が必要です。(現在: §f%current_level%§c)"
-  evolution-fail-bond: "§c進化には絆レベル §f%required_bond% §c以上が必要です。(現在: §f%current_bond%§c)"
-  evolution-fail-biome: "§c進化には §f%required_biome% §cバイオームにいる必要があります。"
-  evolution-fail-item: "§c進化には §f%required_item% x%required_amount% §cが必要です。"
-  evolution-not-available: "§cこのペットには進化先がありません。"
-
-  # --- スキルツリー ---
-  skilltree-reroll-success: "§eスキルツリーを再抽選しました！"
-
-  # --- 装備 ---
-  equip-success: "§a%pet_name% に §f%item_name% §aを装備しました。(スロット: §f%slot%§a)"
-  equip-remove: "§7%pet_name% から §f%item_name% §7を取り外しました。"
-  equip-slot-full: "§cそのスロットには既に装備があります。"
-  equip-invalid-slot: "§c無効な装備スロットです。"
-
-  # --- 図鑑 ---
-  encyclopedia-open: "§7ペット図鑑を開いています..."
-  encyclopedia-progress: "§7図鑑コンプリート率: §f%percent%%%"
-  encyclopedia-complete: "§6§l全ペットの図鑑をコンプリートしました！"
-  encyclopedia-reward: "§a図鑑 §f%percent%%% §a達成報酬を受け取りました！"
-
-  # --- ステータス ---
-  status-header: "§8§m----------§r §b%pet_name% のステータス §8§m----------"
-  status-type: "§7種類: §f%pet_type%"
-  status-rarity: "§7レアリティ: %rarity_colored%"
-  status-personality: "§7性格: §f%personality%"
-  status-bond: "§7絆: Lv.§f%bond_level% §8(§7%bond_exp%§8)"
-  status-life: "§7体力: §c%life%"
-  status-damage: "§7攻撃力: §c%damage%"
-  status-footer: "§8§m------------------------------------------"
-
-  # --- リロール ---
-  reroll-item-missing: "§c%item_name% が必要です。"
-  reroll-confirm: "§eリロールを実行しますか？ §f/pet confirm §eで確定してください。"
-  reroll-cancel: "§7リロールをキャンセルしました。"
-
-  # --- 管理コマンド ---
-  admin-reload: "§a設定ファイルをリロードしました。"
-  admin-reload-fail: "§cリロードに失敗しました。コンソールを確認してください。"
-  admin-set-rarity: "§a%player% の %pet_name% のレアリティを %rarity% に設定しました。"
-  admin-set-bond: "§a%player% の %pet_name% の絆を %bond% に設定しました。"
-
-  # --- 汎用 ---
-  no-permission: "§cその操作を行う権限がありません。"
-  no-pet: "§cアクティブなペットがいません。ペットを召喚してください。"
-  player-only: "§cこのコマンドはプレイヤーのみ使用できます。"
-  unknown-command: "§c不明なコマンドです。§f/pet help §cでヘルプを確認してください。"
-  error-generic: "§cエラーが発生しました。管理者に問い合わせてください。"

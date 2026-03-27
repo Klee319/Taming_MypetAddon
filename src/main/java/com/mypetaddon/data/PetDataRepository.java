@@ -37,32 +37,70 @@ public final class PetDataRepository {
      * Inserts or replaces pet data and all associated stats.
      */
     public void save(@NotNull PetData data, @NotNull PetStats stats) {
-        String sql = "INSERT OR REPLACE INTO pet_data "
+        String dataSql = "INSERT INTO pet_data "
                 + "(addon_pet_id, mypet_uuid, owner_uuid, mob_type, rarity, "
-                + "personality, bond_level, bond_exp, original_lm_level, created_at, evolved_from) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "personality, bond_level, bond_exp, original_lm_level, created_at, evolved_from, captured_scale) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                + "ON CONFLICT(addon_pet_id) DO UPDATE SET "
+                + "mypet_uuid=excluded.mypet_uuid, owner_uuid=excluded.owner_uuid, "
+                + "mob_type=excluded.mob_type, rarity=excluded.rarity, "
+                + "personality=excluded.personality, bond_level=excluded.bond_level, "
+                + "bond_exp=excluded.bond_exp, original_lm_level=excluded.original_lm_level, "
+                + "created_at=excluded.created_at, evolved_from=excluded.evolved_from, "
+                + "captured_scale=excluded.captured_scale";
 
-        try (Connection conn = databaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        String statsSql = "INSERT INTO pet_stats "
+                + "(addon_pet_id, stat_name, base_value, upgraded_value) "
+                + "VALUES (?, ?, ?, ?) "
+                + "ON CONFLICT(addon_pet_id, stat_name) DO UPDATE SET "
+                + "base_value=excluded.base_value, upgraded_value=excluded.upgraded_value";
 
-            ps.setString(1, data.addonPetId().toString());
-            ps.setString(2, data.mypetUuid().toString());
-            ps.setString(3, data.ownerUuid().toString());
-            ps.setString(4, data.mobType());
-            ps.setString(5, data.rarity().name());
-            ps.setString(6, data.personality().name());
-            ps.setInt(7, data.bondLevel());
-            ps.setInt(8, data.bondExp());
-            ps.setInt(9, data.originalLmLevel());
-            ps.setLong(10, data.createdAt());
-            ps.setString(11, data.evolvedFrom() != null ? data.evolvedFrom().toString() : null);
-            ps.executeUpdate();
+        try (Connection conn = databaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Save pet data
+                try (PreparedStatement ps = conn.prepareStatement(dataSql)) {
+                    ps.setString(1, data.addonPetId().toString());
+                    ps.setString(2, data.mypetUuid().toString());
+                    ps.setString(3, data.ownerUuid().toString());
+                    ps.setString(4, data.mobType());
+                    ps.setString(5, data.rarity().name());
+                    ps.setString(6, data.personality().name());
+                    ps.setInt(7, data.bondLevel());
+                    ps.setInt(8, data.bondExp());
+                    ps.setInt(9, data.originalLmLevel());
+                    ps.setLong(10, data.createdAt());
+                    ps.setString(11, data.evolvedFrom() != null ? data.evolvedFrom().toString() : null);
+                    ps.setDouble(12, data.capturedScale());
+                    ps.executeUpdate();
+                }
 
+                // Save stats in same transaction
+                try (PreparedStatement ps = conn.prepareStatement(statsSql)) {
+                    java.util.Set<String> allStatNames = new java.util.LinkedHashSet<>(stats.baseValues().keySet());
+                    allStatNames.addAll(stats.upgradedValues().keySet());
+
+                    for (String statName : allStatNames) {
+                        ps.setString(1, stats.addonPetId().toString());
+                        ps.setString(2, statName);
+                        ps.setDouble(3, stats.baseValues().getOrDefault(statName, 0.0));
+                        ps.setDouble(4, stats.upgradedValues().getOrDefault(statName, 0.0));
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to save pet data: " + data.addonPetId(), e);
+            LOGGER.log(Level.SEVERE, "Failed to save pet data+stats: " + data.addonPetId(), e);
+            throw new RuntimeException("Failed to save pet data+stats: " + data.addonPetId(), e);
         }
-
-        saveStats(stats);
     }
 
     // --- Find ---
@@ -185,6 +223,7 @@ public final class PetDataRepository {
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to update bond for: " + addonPetId, e);
+            throw new RuntimeException("Failed to update bond for: " + addonPetId, e);
         }
     }
 
@@ -203,6 +242,7 @@ public final class PetDataRepository {
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to update mypet_uuid for: " + addonPetId, e);
+            throw new RuntimeException("Failed to update mypet_uuid for: " + addonPetId, e);
         }
     }
 
@@ -221,6 +261,7 @@ public final class PetDataRepository {
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to update mob_type for: " + addonPetId, e);
+            throw new RuntimeException("Failed to update mob_type for: " + addonPetId, e);
         }
     }
 
@@ -249,9 +290,11 @@ public final class PetDataRepository {
      * Saves all stats for a pet (INSERT OR REPLACE for each stat entry).
      */
     public void saveStats(@NotNull PetStats stats) {
-        String sql = "INSERT OR REPLACE INTO pet_stats "
+        String sql = "INSERT INTO pet_stats "
                 + "(addon_pet_id, stat_name, base_value, upgraded_value) "
-                + "VALUES (?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?) "
+                + "ON CONFLICT(addon_pet_id, stat_name) DO UPDATE SET "
+                + "base_value=excluded.base_value, upgraded_value=excluded.upgraded_value";
 
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -271,6 +314,7 @@ public final class PetDataRepository {
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to save stats for: " + stats.addonPetId(), e);
+            throw new RuntimeException("Failed to save stats for: " + stats.addonPetId(), e);
         }
     }
 
@@ -280,6 +324,13 @@ public final class PetDataRepository {
     private PetData mapPetData(@NotNull ResultSet rs) throws SQLException {
         String evolvedFromStr = rs.getString("evolved_from");
         UUID evolvedFrom = evolvedFromStr != null ? UUID.fromString(evolvedFromStr) : null;
+
+        double capturedScale = 0.0;
+        try {
+            capturedScale = rs.getDouble("captured_scale");
+        } catch (SQLException ignored) {
+            // Column may not exist in legacy databases before migration runs
+        }
 
         return new PetData(
                 UUID.fromString(rs.getString("addon_pet_id")),
@@ -292,7 +343,8 @@ public final class PetDataRepository {
                 rs.getInt("bond_exp"),
                 rs.getInt("original_lm_level"),
                 rs.getLong("created_at"),
-                evolvedFrom
+                evolvedFrom,
+                capturedScale
         );
     }
 }

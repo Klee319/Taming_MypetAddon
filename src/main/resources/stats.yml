@@ -1,0 +1,197 @@
+# ============================================================================
+#  MyPetAddon - ペット基本ステータス設定
+#  モブタイプごとの基礎ステータス (Life/Damage/Speed) の範囲を定義します。
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+
+pet-base-values:
+  # --- ティア1: 弱い一般モブ ---
+  tier-1:
+    types:
+      - "CHICKEN"
+      - "RABBIT"
+      - "COD"
+      - "SALMON"
+      - "TROPICAL_FISH"
+      - "PUFFERFISH"
+      - "BAT"
+      - "SILVERFISH"
+      - "ENDERMITE"
+      - "SQUID"
+      - "GLOW_SQUID"
+      - "TADPOLE"
+    stats:
+      Life:
+        min: 10.0
+        max: 20.0
+      Damage:
+        min: 1.0
+        max: 3.0
+      Speed:
+        min: 0.20
+        max: 0.30
+
+  # --- ティア2: 一般的な動物 ---
+  tier-2:
+    types:
+      - "PIG"
+      - "COW"
+      - "SHEEP"
+      - "HORSE"
+      - "DONKEY"
+      - "MULE"
+      - "LLAMA"
+      - "CAT"
+      - "WOLF"
+      - "FOX"
+      - "OCELOT"
+      - "PARROT"
+      - "TURTLE"
+      - "FROG"
+      - "GOAT"
+      - "CAMEL"
+      - "SNIFFER"
+      - "ARMADILLO"
+      - "ALLAY"
+      - "AXOLOTL"
+      - "BEE"
+      - "DOLPHIN"
+      - "MOOSHROOM"
+      - "PANDA"
+      - "POLAR_BEAR"
+      - "STRIDER"
+      - "COPPER_GOLEM"
+      - "ZOMBIE_HORSE"
+      - "SKELETON_HORSE"
+      - "SNOW_GOLEM"
+    stats:
+      Life:
+        min: 20.0
+        max: 40.0
+      Damage:
+        min: 2.0
+        max: 5.0
+      Speed:
+        min: 0.22
+        max: 0.32
+
+  # --- ティア3: 一般的な敵対モブ ---
+  tier-3:
+    types:
+      - "ZOMBIE"
+      - "SKELETON"
+      - "SPIDER"
+      - "CREEPER"
+      - "SLIME"
+      - "ENDERMAN"
+      - "CAVE_SPIDER"
+      - "DROWNED"
+      - "HUSK"
+      - "STRAY"
+      - "PHANTOM"
+      - "PILLAGER"
+      - "VINDICATOR"
+      - "WITCH"
+      - "MAGMA_CUBE"
+      - "CREAKING"
+      - "HOGLIN"
+      - "PIGLIN"
+      - "PIGLIN_BRUTE"
+      - "ZOMBIFIED_PIGLIN"
+      - "ZOMBIE_VILLAGER"
+      - "BOGGED"
+      - "ZOGLIN"
+    stats:
+      Life:
+        min: 15.0
+        max: 30.0
+      Damage:
+        min: 4.0
+        max: 8.0
+      Speed:
+        min: 0.25
+        max: 0.35
+
+  # --- ティア4: 強力な敵対モブ ---
+  tier-4:
+    types:
+      - "BLAZE"
+      - "GHAST"
+      - "WITHER_SKELETON"
+      - "EVOKER"
+      - "RAVAGER"
+      - "GUARDIAN"
+      - "VEX"
+      - "BREEZE"
+      - "IRON_GOLEM"
+    stats:
+      Life:
+        min: 50.0
+        max: 100.0
+      Damage:
+        min: 6.0
+        max: 14.0
+      Speed:
+        min: 0.25
+        max: 0.38
+
+  # --- ティア5: ボス級モブ ---
+  # ティア5: ボス級モブ（WITHER/WARDENはspecialで個別定義）
+  tier-5:
+    types:
+      - "ELDER_GUARDIAN"
+    stats:
+      Life:
+        min: 100.0
+        max: 150.0
+      Damage:
+        min: 12.0
+        max: 25.0
+      Speed:
+        min: 0.28
+        max: 0.40
+
+  # --- 特殊ティア: 個別調整が必要なモブ ---
+  special:
+    wither:
+      types:
+        - "WITHER"
+      stats:
+        Life:
+          min: 150.0
+          max: 200.0
+        Damage:
+          min: 15.0
+          max: 30.0
+        Speed:
+          min: 0.30
+          max: 0.42
+
+    warden:
+      types:
+        - "WARDEN"
+      stats:
+        Life:
+          min: 200.0
+          max: 250.0
+        Damage:
+          min: 20.0
+          max: 40.0
+        Speed:
+          min: 0.30
+          max: 0.45
+
+    wolf-bee:
+      types:
+        - "WOLF"
+        - "BEE"
+      stats:
+        Life:
+          min: 25.0
+          max: 50.0
+        Damage:
+          min: 3.0
+          max: 7.0
+        Speed:
+          min: 0.30
+          max: 0.40

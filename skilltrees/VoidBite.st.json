@@ -1,0 +1,103 @@
+{
+  "Order": 36,
+  "Description": [
+    "- <dark_purple><bold>虚空の侵食 (超高速攻撃)",
+    "- <blue><bold>スプリント + テレポート的速度",
+    "- <red><bold>ノックバック",
+    "- <yellow><bold>ビーコン (速度)"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+2"
+        },
+        "10": {
+          "Damage": "+2"
+        },
+        "20": {
+          "Damage": "+2"
+        },
+        "30": {
+          "Damage": "+2"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "15": {
+          "Chance": "+39"
+        },
+        "35": {
+          "Chance": "+26"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "25": {
+          "Health": "+4"
+        },
+        "42": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "50": {
+          "Buffs": {
+            "Speed": "+3"
+          },
+          "Duration": "+8",
+          "Count": "+1",
+          "Range": "+6"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "15": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ENDERMITE"
+  ],
+  "ID": "VoidBite",
+  "Icon": {
+    "Material": "ender_eye",
+    "Glowing": true
+  },
+  "Name": "ヴォイドバイト"
+}

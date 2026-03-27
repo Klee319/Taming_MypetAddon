@@ -1,0 +1,103 @@
+{
+  "Order": 0,
+  "Description": [
+    "- <red><bold>ダメージ強化",
+    "- <green><bold>HP回復",
+    "- <red><bold>トゲ",
+    "- <blue><bold>ノックバック"
+  ],
+  "Skills": {
+    "Backpack": {
+      "Upgrades": {
+        "25": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "30": {
+          "Active": true
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "15": {
+          "Health": "+5"
+        },
+        "35": {
+          "Health": "+9"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "50": {
+          "Chance": "+24"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "20": {
+          "Reflection": "+15",
+          "Chance": "+16"
+        },
+        "42": {
+          "Chance": "+15"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "5": {
+          "Health": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "10": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+3"
+        },
+        "10": {
+          "Damage": "+3"
+        },
+        "25": {
+          "Damage": "+4"
+        },
+        "35": {
+          "Damage": "+4"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Combat",
+  "Icon": {
+    "Material": "stone_axe"
+  },
+  "Name": "コンバット"
+}

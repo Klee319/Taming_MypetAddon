@@ -1,0 +1,119 @@
+{
+  "Order": 16,
+  "Description": [
+    "- <aqua><bold>潮の障壁 (トゲ)",
+    "- <yellow><bold>ビーコン (水中呼吸 + 耐性)",
+    "- <green><bold>HP増加",
+    "- <red><bold>遠距離攻撃"
+  ],
+  "Skills": {
+    "Thorns": {
+      "Upgrades": {
+        "1": {
+          "Reflection": "+25",
+          "Chance": "+32"
+        },
+        "20": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        },
+        "42": {
+          "Reflection": "+15",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "15": {
+          "Buffs": {
+            "WaterBreathing": true
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        },
+        "35": {
+          "Buffs": {
+            "Resistance": "+1"
+          },
+          "Duration": "+5",
+          "Count": "+1",
+          "Range": "+5"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+4"
+        },
+        "25": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Ranged": {
+      "Upgrades": {
+        "15": {
+          "Rate": "+35",
+          "Damage": "+3",
+          "Projectile": "Arrow"
+        },
+        "30": {
+          "Rate": "+25",
+          "Damage": "+4"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+3",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "50": {
+          "Timer": "+40",
+          "Health": "+6"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "20": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "10": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "GUARDIAN",
+    "ElderGuardian",
+    "TURTLE",
+    "SQUID",
+    "GlowSquid",
+    "AXOLOTL",
+    "DOLPHIN"
+  ],
+  "ID": "TidalGuard",
+  "Icon": {
+    "Material": "prismarine_shard",
+    "Glowing": true
+  },
+  "Name": "タイダルガード"
+}

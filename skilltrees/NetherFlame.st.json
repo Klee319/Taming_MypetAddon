@@ -1,0 +1,106 @@
+{
+  "Order": 13,
+  "Description": [
+    "- <red><bold>猛火",
+    "- <red><bold>遠距離火炎攻撃",
+    "- <red><bold>炎の鎧 (トゲ)",
+    "- <red><bold>高ダメージ"
+  ],
+  "Skills": {
+    "Fire": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "20": {
+          "Duration": "+3",
+          "Chance": "+20"
+        },
+        "42": {
+          "Duration": "+2",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Ranged": {
+      "Upgrades": {
+        "5": {
+          "Rate": "+35",
+          "Damage": "+2",
+          "Projectile": "Arrow"
+        },
+        "25": {
+          "Rate": "+20",
+          "Damage": "+2"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "15": {
+          "Reflection": "+20",
+          "Chance": "+32"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "10": {
+          "Damage": "+2"
+        },
+        "30": {
+          "Damage": "+2"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "35": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "35": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "BLAZE",
+    "MagmaCube",
+    "GHAST",
+    "STRIDER"
+  ],
+  "ID": "NetherFlame",
+  "Icon": {
+    "Material": "blaze_rod",
+    "Glowing": true
+  },
+  "Name": "ネザーフレイム"
+}

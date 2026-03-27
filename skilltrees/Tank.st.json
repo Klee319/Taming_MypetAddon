@@ -1,0 +1,100 @@
+{
+  "Order": 5,
+  "Description": [
+    "- <green><bold>HP大幅増加",
+    "- <green><bold>高速回復",
+    "- <red><bold>強力トゲ",
+    "- <yellow><bold>ビーコン (耐性)"
+  ],
+  "Skills": {
+    "Life": {
+      "Upgrades": {
+        "1": {
+          "Health": "+10"
+        },
+        "15": {
+          "Health": "+12"
+        },
+        "30": {
+          "Health": "+13"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "5": {
+          "Timer": "+35",
+          "Health": "+5"
+        },
+        "25": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "10": {
+          "Reflection": "+25",
+          "Chance": "+32"
+        },
+        "35": {
+          "Reflection": "+20",
+          "Chance": "+24"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "42": {
+          "Buffs": {
+            "Resistance": "+2"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+5"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "20": {
+          "Damage": "+4"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "50": {
+          "Chance": "+32"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "10": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "25": {
+          "drop": false,
+          "rows": "+1"
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "*"
+  ],
+  "ID": "Tank",
+  "Icon": {
+    "Material": "iron_chestplate"
+  },
+  "Name": "タンク"
+}

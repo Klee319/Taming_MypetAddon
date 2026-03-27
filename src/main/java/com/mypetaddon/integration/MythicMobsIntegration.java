@@ -50,6 +50,10 @@ public final class MythicMobsIntegration {
                 return false;
             }
             Object result = isActiveMobMethod.invoke(mobManager, entity.getUniqueId());
+            // getActiveMob returns Optional<ActiveMob> — check isPresent(), not null
+            if (result instanceof java.util.Optional<?> optional) {
+                return optional.isPresent();
+            }
             return result != null;
         } catch (Exception e) {
             logger.fine("[MythicMobs] Failed to check entity: " + e.getMessage());

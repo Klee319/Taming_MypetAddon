@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,8 +34,14 @@ public final class PetDataCache {
     /** Addon Pet ID -> PetStats */
     private final Map<UUID, PetStats> statsByAddonPetId = new ConcurrentHashMap<>();
 
+    /** Addon Pet ID -> MyPet UUID (reverse index for O(1) lookup) */
+    private final Map<UUID, UUID> addonPetIdToMypetUuid = new ConcurrentHashMap<>();
+
     /** Addon Pet IDs that have been modified and need DB write */
     private final Set<UUID> dirtyAddonPetIds = ConcurrentHashMap.newKeySet();
+
+    /** Optional callback to preload equipment cache when pet data is loaded. */
+    private volatile Consumer<UUID> equipmentPreloader;
 
     public PetDataCache(@NotNull PetDataRepository repository, @NotNull JavaPlugin plugin) {
         this.repository = repository;
@@ -43,46 +50,45 @@ public final class PetDataCache {
     }
 
     /**
-     * Gets pet data by MyPet UUID. Loads from database if not cached.
+     * Sets an equipment preloader callback that runs during {@link #preloadForPlayer(UUID)}.
+     * Called for each addon pet ID to warm the equipment cache.
+     */
+    public void setEquipmentPreloader(@Nullable Consumer<UUID> preloader) {
+        this.equipmentPreloader = preloader;
+    }
+
+    /**
+     * Gets pet data by MyPet UUID from cache only.
+     * Returns null on cache miss instead of doing a synchronous DB query.
+     * Data should be preloaded via {@link #preloadForPlayer(UUID)} on PlayerJoin.
      *
      * @param mypetUuid the MyPet internal UUID
-     * @return the PetData, or null if not found
+     * @return the PetData, or null if not cached
      */
     @Nullable
     public PetData get(@NotNull UUID mypetUuid) {
         PetData cached = dataByMypetUuid.get(mypetUuid);
-        if (cached != null) {
-            return cached;
+        if (cached == null) {
+            logger.log(Level.FINE, "[Cache] Cache miss for MyPet UUID {0}", mypetUuid);
         }
-
-        // Load from DB on cache miss
-        return repository.findByMypetUuid(mypetUuid)
-                .map(data -> {
-                    dataByMypetUuid.put(mypetUuid, data);
-                    return data;
-                })
-                .orElse(null);
+        return cached;
     }
 
     /**
-     * Gets pet stats by addon pet ID. Loads from database if not cached.
+     * Gets pet stats by addon pet ID from cache only.
+     * Returns null on cache miss instead of doing a synchronous DB query.
+     * Stats should be preloaded via {@link #preloadForPlayer(UUID)} on PlayerJoin.
      *
      * @param addonPetId the addon-internal pet UUID
-     * @return the PetStats, or null if not found
+     * @return the PetStats, or null if not cached
      */
     @Nullable
     public PetStats getStats(@NotNull UUID addonPetId) {
         PetStats cached = statsByAddonPetId.get(addonPetId);
-        if (cached != null) {
-            return cached;
+        if (cached == null) {
+            logger.log(Level.FINE, "[Cache] Cache miss for addon pet ID {0}", addonPetId);
         }
-
-        return repository.findStatsByAddonPetId(addonPetId)
-                .map(stats -> {
-                    statsByAddonPetId.put(addonPetId, stats);
-                    return stats;
-                })
-                .orElse(null);
+        return cached;
     }
 
     /**
@@ -95,8 +101,19 @@ public final class PetDataCache {
         List<PetData> pets = repository.findByOwner(ownerUuid);
         for (PetData data : pets) {
             dataByMypetUuid.putIfAbsent(data.mypetUuid(), data);
+            addonPetIdToMypetUuid.putIfAbsent(data.addonPetId(), data.mypetUuid());
             repository.findStatsByAddonPetId(data.addonPetId())
                     .ifPresent(stats -> statsByAddonPetId.putIfAbsent(data.addonPetId(), stats));
+
+            // Warm equipment cache to avoid sync DB query on main thread
+            Consumer<UUID> preloader = equipmentPreloader;
+            if (preloader != null) {
+                try {
+                    preloader.accept(data.addonPetId());
+                } catch (Exception e) {
+                    logger.log(Level.FINE, "[Cache] Equipment preload failed for {0}", data.addonPetId());
+                }
+            }
         }
     }
 
@@ -105,6 +122,7 @@ public final class PetDataCache {
      */
     public void put(@NotNull PetData data, @NotNull PetStats stats) {
         dataByMypetUuid.put(data.mypetUuid(), data);
+        addonPetIdToMypetUuid.put(data.addonPetId(), data.mypetUuid());
         statsByAddonPetId.put(data.addonPetId(), stats);
         dirtyAddonPetIds.add(data.addonPetId());
     }
@@ -114,12 +132,14 @@ public final class PetDataCache {
      * Scans the cache to find the matching entry by addon pet ID.
      */
     public void updateBond(@NotNull UUID addonPetId, int bondLevel, int bondExp) {
-        dataByMypetUuid.replaceAll((mypetUuid, existing) -> {
-            if (existing.addonPetId().equals(addonPetId)) {
-                dirtyAddonPetIds.add(addonPetId);
-                return existing.withBond(bondLevel, bondExp);
-            }
-            return existing;
+        UUID mypetUuid = addonPetIdToMypetUuid.get(addonPetId);
+        if (mypetUuid == null) {
+            return;
+        }
+
+        dataByMypetUuid.computeIfPresent(mypetUuid, (key, existing) -> {
+            dirtyAddonPetIds.add(addonPetId);
+            return existing.withBond(bondLevel, bondExp);
         });
     }
 
@@ -129,6 +149,7 @@ public final class PetDataCache {
     public void invalidate(@NotNull UUID mypetUuid) {
         PetData removed = dataByMypetUuid.remove(mypetUuid);
         if (removed != null) {
+            addonPetIdToMypetUuid.remove(removed.addonPetId());
             statsByAddonPetId.remove(removed.addonPetId());
             dirtyAddonPetIds.remove(removed.addonPetId());
         }
@@ -178,14 +199,17 @@ public final class PetDataCache {
             PetData data = entry.getValue();
             PetStats stats = statsByAddonPetId.get(data.addonPetId());
 
-            if (stats != null) {
-                try {
+            try {
+                if (stats != null) {
                     repository.save(data, stats);
-                    count++;
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE,
-                            "Failed to flush pet on shutdown: " + data.addonPetId(), e);
+                } else {
+                    // Stats not cached — persist bond update at minimum
+                    repository.updateBond(data.addonPetId(), data.bondLevel(), data.bondExp());
                 }
+                count++;
+            } catch (Exception e) {
+                logger.log(Level.SEVERE,
+                        "Failed to flush pet on shutdown: " + data.addonPetId(), e);
             }
         }
 
@@ -209,11 +233,10 @@ public final class PetDataCache {
 
     @Nullable
     private PetData findDataByAddonPetId(@NotNull UUID addonPetId) {
-        for (PetData data : dataByMypetUuid.values()) {
-            if (data.addonPetId().equals(addonPetId)) {
-                return data;
-            }
+        UUID mypetUuid = addonPetIdToMypetUuid.get(addonPetId);
+        if (mypetUuid == null) {
+            return null;
         }
-        return null;
+        return dataByMypetUuid.get(mypetUuid);
     }
 }

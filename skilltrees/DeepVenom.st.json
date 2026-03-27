@@ -1,0 +1,110 @@
+{
+  "Order": 46,
+  "Description": [
+    "- <dark_green><bold>深層毒牙 (毒最強化)",
+    "- <red><bold>高速連撃 + 鈍足",
+    "- <blue><bold>スプリント",
+    "- <red><bold>ダメージ"
+  ],
+  "Skills": {
+    "Poison": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+5",
+          "Chance": "+46"
+        },
+        "15": {
+          "Duration": "+4",
+          "Chance": "+26"
+        },
+        "35": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "5": {
+          "Damage": "+2"
+        },
+        "20": {
+          "Damage": "+2"
+        },
+        "42": {
+          "Damage": "+3"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+4",
+          "Chance": "+39"
+        },
+        "30": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "25": {
+          "Health": "+4"
+        },
+        "50": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "50": {
+          "Chance": "+26"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "15": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "CaveSpider"
+  ],
+  "ID": "DeepVenom",
+  "Icon": {
+    "Material": "fermented_spider_eye",
+    "Glowing": true
+  },
+  "Name": "ディープヴェノム"
+}

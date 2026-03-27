@@ -1,0 +1,133 @@
+{
+  "Order": 20,
+  "Description": [
+    "- <gray><bold>蒼白の恐怖 (高ダメージ + 鈍足)",
+    "- <red><bold>トゲの鎧",
+    "- <green><bold>生命吸収 (回復)",
+    "- <yellow><bold>ビーコン (暗闘の力)"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+3"
+        },
+        "15": {
+          "Damage": "+2"
+        },
+        "30": {
+          "Damage": "+3"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "5": {
+          "Duration": "+4",
+          "Chance": "+39"
+        },
+        "35": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "10": {
+          "Reflection": "+25",
+          "Chance": "+32"
+        },
+        "42": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+5"
+        },
+        "25": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "20": {
+          "Timer": "+30",
+          "Health": "+5"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "15": {
+          "Chance": "+32"
+        },
+        "35": {
+          "Chance": "+20"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "50": {
+          "Buffs": {
+            "Strength": "+2",
+            "Resistance": "+1"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "30": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "CREAKING"
+  ],
+  "ID": "PaleHorror",
+  "Icon": {
+    "Material": "pale_oak_log",
+    "Glowing": true
+  },
+  "Name": "ペイルホラー"
+}

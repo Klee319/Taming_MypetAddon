@@ -1,0 +1,123 @@
+{
+  "Order": 17,
+  "Description": [
+    "- <dark_gray><bold>ウィザースカル砲撃",
+    "- <red><bold>高火力遠距離攻撃",
+    "- <red><bold>爆発反射 (トゲ)",
+    "- <green><bold>HP大幅増加",
+    "- <yellow><bold>ビーコン (ウィザー)"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+50",
+          "Damage": "+5",
+          "Projectile": "WitherSkull"
+        },
+        "15": {
+          "Rate": "+30",
+          "Damage": "+4"
+        },
+        "30": {
+          "Rate": "+20",
+          "Damage": "+4"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+6"
+        },
+        "20": {
+          "Health": "+6"
+        },
+        "35": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "10": {
+          "Reflection": "+25",
+          "Chance": "+39"
+        },
+        "42": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "25": {
+          "Damage": "+4"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "35": {
+          "Buffs": {
+            "Resistance": "+2",
+            "Strength": "+1"
+          },
+          "Duration": "+12",
+          "Count": "+1",
+          "Range": "+10"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "15": {
+          "Timer": "+30",
+          "Health": "+6"
+        }
+      }
+    },
+    "Fire": {
+      "Upgrades": {
+        "20": {
+          "Duration": "+5",
+          "Chance": "+39"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "WitherSkeleton"
+  ],
+  "ID": "WitherWrath",
+  "Icon": {
+    "Material": "wither_skeleton_skull",
+    "Glowing": true
+  },
+  "Name": "ウィザーラス"
+}

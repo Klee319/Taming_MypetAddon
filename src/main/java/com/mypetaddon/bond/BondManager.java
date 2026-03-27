@@ -5,7 +5,13 @@ import com.mypetaddon.config.ConfigManager;
 import com.mypetaddon.data.PetData;
 import com.mypetaddon.data.cache.PetDataCache;
 import com.mypetaddon.personality.Personality;
+import com.mypetaddon.stats.StatsManager;
+import de.Keyle.MyPet.MyPetApi;
+import de.Keyle.MyPet.api.entity.MyPet;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.UUID;
@@ -24,6 +30,10 @@ public final class BondManager {
     private final PetDataCache petDataCache;
     private final Logger logger;
 
+    /** Set after StatsManager is initialized (avoids circular dependency). */
+    @Nullable
+    private volatile StatsManager statsManager;
+
     /** Addon Pet ID -> (source -> last gain timestamp). */
     private final Map<UUID, Map<String, Long>> lastGainTimestamps = new ConcurrentHashMap<>();
 
@@ -34,6 +44,14 @@ public final class BondManager {
         this.configManager = configManager;
         this.petDataCache = petDataCache;
         this.logger = plugin.getLogger();
+    }
+
+    /**
+     * Sets the stats manager for bond-level-change stat reapplication.
+     * Called after StatsManager is initialized.
+     */
+    public void setStatsManager(@NotNull StatsManager statsManager) {
+        this.statsManager = statsManager;
     }
 
     /**
@@ -60,11 +78,18 @@ public final class BondManager {
         Map<String, Long> sourceTimestamps = lastGainTimestamps
                 .computeIfAbsent(addonPetId, k -> new ConcurrentHashMap<>());
 
-        Long lastGain = sourceTimestamps.get(source);
-        if (lastGain != null && (now - lastGain) < debounceMs) {
+        // Atomic check-and-update using compute to avoid race conditions
+        boolean[] debounced = {false};
+        sourceTimestamps.compute(source, (key, lastGain) -> {
+            if (lastGain != null && (now - lastGain) < debounceMs) {
+                debounced[0] = true;
+                return lastGain; // Keep existing timestamp
+            }
+            return now; // Update to current time
+        });
+        if (debounced[0]) {
             return; // Still in debounce window
         }
-        sourceTimestamps.put(source, now);
 
         // Apply LOYAL personality multiplier
         double multiplier = personality.getCustomEffect("bondExpMultiplier", 1.0);
@@ -106,6 +131,19 @@ public final class BondManager {
     }
 
     /**
+     * Applies a bond penalty for pet death (bypasses debounce).
+     *
+     * @param addonPetId   the addon-internal pet UUID
+     * @param penaltyAmount the amount of bond EXP to subtract
+     */
+    public void applyDeathPenalty(@NotNull UUID addonPetId, int penaltyAmount) {
+        if (penaltyAmount <= 0) {
+            return;
+        }
+        updateBondInCache(addonPetId, -penaltyAmount);
+    }
+
+    /**
      * Cleans up debounce timestamps for a pet (e.g. when pet is removed).
      */
     public void cleanup(@NotNull UUID addonPetId) {
@@ -142,8 +180,28 @@ public final class BondManager {
                     + currentLevel + " -> " + newLevel);
 
             // Trigger stat reapply on the main thread
-            // Stats will be recalculated with the new bond level on next MyPet activation
-            // or can be triggered manually through StatsManager
+            StatsManager sm = statsManager;
+            if (sm != null) {
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    Player owner = Bukkit.getPlayer(petData.ownerUuid());
+                    if (owner == null || !owner.isOnline()) {
+                        return;
+                    }
+                    try {
+                        var pm = MyPetApi.getPlayerManager();
+                        if (!pm.isMyPetPlayer(owner)) {
+                            return;
+                        }
+                        var myPetPlayer = pm.getMyPetPlayer(owner);
+                        if (myPetPlayer.hasMyPet()) {
+                            sm.applyStats(myPetPlayer.getMyPet());
+                        }
+                    } catch (Exception e) {
+                        logger.fine("[Bond] Could not reapply stats after bond level change: "
+                                + e.getMessage());
+                    }
+                });
+            }
         }
     }
 

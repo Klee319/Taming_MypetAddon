@@ -1,0 +1,106 @@
+{
+  "Order": 38,
+  "Description": [
+    "- <white><bold>骸骨の騎馬 (高速騎乗)",
+    "- <red><bold>遠距離攻撃",
+    "- <blue><bold>スプリント",
+    "- <yellow><bold>アイテム回収"
+  ],
+  "Skills": {
+    "Ride": {
+      "Upgrades": {
+        "1": {
+          "Speed": "+6",
+          "Active": true,
+          "JumpHeight": "+1.5"
+        },
+        "25": {
+          "Speed": "+3"
+        },
+        "50": {
+          "Speed": "+2"
+        }
+      }
+    },
+    "Ranged": {
+      "Upgrades": {
+        "10": {
+          "Rate": "+35",
+          "Damage": "+3",
+          "Projectile": "Arrow"
+        },
+        "35": {
+          "Rate": "+20",
+          "Damage": "+2"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "5": {
+          "Active": true
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "15": {
+          "Health": "+4"
+        },
+        "42": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "20": {
+          "Range": "+3",
+          "Exp": true
+        }
+      }
+    },
+    "Backpack": {
+      "Upgrades": {
+        "30": {
+          "drop": false,
+          "rows": "+2"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": true,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "SkeletonHorse"
+  ],
+  "ID": "BoneSteed",
+  "Icon": {
+    "Material": "bone",
+    "Glowing": true
+  },
+  "Name": "ボーンスティード"
+}

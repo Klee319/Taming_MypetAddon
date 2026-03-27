@@ -1,0 +1,86 @@
+# ============================================================================
+#  MyPetAddon - 性格設定
+#  ペットの性格タイプ、ステータス補正、特殊効果、出現重みを設定します。
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+
+personalities:
+  BRAVE:
+    display-name: "勇敢"
+    description: "戦闘で恐れを知らず、攻撃力が上昇する"
+    modifiers:
+      Damage: 1.10
+      Life: 0.95
+    custom-effects:
+      aggroRange: 1.2
+    weight: 20
+
+  STURDY:
+    display-name: "頑強"
+    description: "タフで打たれ強く、ダメージを吸収する"
+    modifiers:
+      Life: 1.15
+      Damage: 0.95
+    custom-effects:
+      knockbackResist: 1.3
+    weight: 20
+
+  AGILE:
+    display-name: "俊敏"
+    description: "素早い身のこなしで攻撃を回避する"
+    modifiers:
+      Speed: 1.15
+      Life: 0.90
+    custom-effects:
+      dodgeChance: 0.08
+    weight: 18
+
+  LOYAL:
+    display-name: "忠誠"
+    description: "深い絆を持ち、信頼を早く獲得する"
+    modifiers:
+      Life: 1.05
+    custom-effects:
+      bondExpMultiplier: 1.25
+    weight: 18
+
+  FIERCE:
+    display-name: "獰猛"
+    description: "壊滅的なクリティカルストライクを放つ"
+    modifiers:
+      Damage: 1.20
+      Life: 0.90
+      Speed: 0.95
+    custom-effects:
+      critChance: 0.10
+    weight: 12
+
+  CAUTIOUS:
+    display-name: "慎重"
+    description: "注意深く、不意を突かれることが少ない"
+    modifiers:
+      Life: 1.10
+      Speed: 1.05
+      Damage: 0.90
+    custom-effects:
+      threatDetectRange: 1.5
+    weight: 12
+
+  LUCKY:
+    display-name: "幸運"
+    description: "幸運に恵まれた仲間"
+    modifiers: {}
+    custom-effects:
+      lootBonusChance: 0.15
+      rareDropMultiplier: 1.3
+    weight: 5
+
+  GENIUS:
+    display-name: "天才"
+    description: "明晰な頭脳でスキルを素早く習得する"
+    modifiers:
+      Damage: 1.05
+    custom-effects:
+      skillExpMultiplier: 1.30
+      skillCooldownReduction: 0.10
+    weight: 5

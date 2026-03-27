@@ -176,6 +176,14 @@ public final class DatabaseManager {
                 + ")"
             );
 
+            // --- Migrations ---
+            // Add captured_scale column if not present (added in v1.1)
+            try {
+                stmt.execute("ALTER TABLE pet_data ADD COLUMN captured_scale REAL NOT NULL DEFAULT 0.0");
+            } catch (SQLException ignored) {
+                // Column already exists — expected on subsequent starts
+            }
+
             // --- Indexes ---
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_pet_data_mypet_uuid ON pet_data(mypet_uuid)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_pet_data_owner_uuid ON pet_data(owner_uuid)");

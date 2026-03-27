@@ -1,0 +1,115 @@
+{
+  "Order": 34,
+  "Description": [
+    "- <aqua><bold>氷矢 (超鈍足 + 遠距離)",
+    "- <red><bold>高速連射",
+    "- <blue><bold>スプリント",
+    "- <yellow><bold>ビーコン (速度)"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+45",
+          "Damage": "+3",
+          "Projectile": "Arrow"
+        },
+        "15": {
+          "Rate": "+30",
+          "Damage": "+2"
+        },
+        "30": {
+          "Rate": "+20",
+          "Damage": "+2"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "5": {
+          "Duration": "+5",
+          "Chance": "+46"
+        },
+        "25": {
+          "Duration": "+3",
+          "Chance": "+26"
+        },
+        "42": {
+          "Duration": "+2",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "20": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "50": {
+          "Buffs": {
+            "Speed": "+2"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "35": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "35": {
+          "Range": "+2",
+          "Exp": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "STRAY"
+  ],
+  "ID": "FrostArrow",
+  "Icon": {
+    "Material": "packed_ice",
+    "Glowing": true
+  },
+  "Name": "フロストアロー"
+}

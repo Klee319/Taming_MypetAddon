@@ -56,9 +56,12 @@ public final class EquipmentListener implements Listener {
             return;
         }
 
-        // Schedule recalculation on next tick (after EquipmentGUI async save completes)
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        // Recalculate stats on next tick (equipment cache is already updated synchronously)
+        Bukkit.getScheduler().runTask(plugin, () -> {
             try {
+                if (!player.isOnline()) {
+                    return;
+                }
                 if (!MyPetApi.getPlayerManager().isMyPetPlayer(player)) {
                     return;
                 }
@@ -81,6 +84,6 @@ public final class EquipmentListener implements Listener {
                 logger.log(Level.WARNING,
                         "[Equipment] Failed to recalculate stats after equipment change", e);
             }
-        }, 2L); // 2 ticks delay to allow async DB write to propagate
+        });
     }
 }

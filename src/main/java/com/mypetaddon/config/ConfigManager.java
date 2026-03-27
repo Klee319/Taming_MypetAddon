@@ -4,10 +4,12 @@ import com.mypetaddon.personality.Personality;
 import com.mypetaddon.rarity.Rarity;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -20,6 +22,11 @@ import java.util.logging.Logger;
  * All getters return immutable snapshots or defensive copies.
  */
 public final class ConfigManager {
+
+    private static final String[] SUB_CONFIGS = {
+            "rarity.yml", "personality.yml", "bond.yml", "stats.yml",
+            "evolution.yml", "skilltree.yml", "equipment.yml", "messages.yml"
+    };
 
     private final JavaPlugin plugin;
     private final Logger logger;
@@ -40,6 +47,11 @@ public final class ConfigManager {
         plugin.reloadConfig();
         FileConfiguration loaded = plugin.getConfig();
 
+        // Load sub-configs and merge into main config
+        for (String subFile : SUB_CONFIGS) {
+            mergeSubConfig(loaded, subFile);
+        }
+
         ValidationResult result = validator.validate(loaded);
         if (!result.valid()) {
             result.errors().forEach(error -> logger.severe("[Config] " + error));
@@ -58,6 +70,11 @@ public final class ConfigManager {
     public ValidationResult reload() {
         plugin.reloadConfig();
         FileConfiguration candidate = plugin.getConfig();
+
+        // Re-merge sub-configs after reloading the main config
+        for (String subFile : SUB_CONFIGS) {
+            mergeSubConfig(candidate, subFile);
+        }
 
         ValidationResult result = validator.validate(candidate);
         if (result.valid()) {
@@ -130,6 +147,35 @@ public final class ConfigManager {
         return config.getInt(path, personality.getWeight());
     }
 
+    /**
+     * Returns the stat modifier for a personality from config.
+     * Falls back to the enum's default modifier if not configured.
+     */
+    public double getPersonalityModifier(@NotNull Personality personality,
+                                          @NotNull String statName) {
+        String path = "personalities." + personality.name() + ".modifiers." + statName;
+        return config.getDouble(path, personality.getModifier(statName, 1.0));
+    }
+
+    // ─── Bond Level Config ──────────────────────────────────────
+
+    /**
+     * Returns the EXP threshold for a bond level from config.
+     * Falls back to the hardcoded default if not configured.
+     */
+    public int getBondExpThreshold(int level) {
+        return config.getInt("bond.levels." + level + ".exp-threshold", -1);
+    }
+
+    /**
+     * Returns the stat bonus for a bond level and stat name from config.
+     * Falls back to -1 if not configured (caller should use default).
+     */
+    public double getBondStatBonus(int level, @NotNull String statName) {
+        String path = "bond.levels." + level + ".stat-bonuses." + statName;
+        return config.getDouble(path, -1.0);
+    }
+
     // ─── Taming ──────────────────────────────────────────────────
 
     /**
@@ -171,6 +217,36 @@ public final class ConfigManager {
 
     public boolean isTamingRequireKill() {
         return config.getBoolean("taming.monster-require-kill", true);
+    }
+
+    /**
+     * Returns the set of mob types excluded from taming.
+     */
+    @NotNull
+    public java.util.Set<String> getTamingExcludedTypes() {
+        List<String> list = config.getStringList("taming.excluded-types");
+        java.util.Set<String> result = new java.util.HashSet<>();
+        for (String s : list) {
+            result.add(s.toUpperCase());
+        }
+        return result;
+    }
+
+    /**
+     * Returns the max taming attempts allowed per mob entity (0 = unlimited).
+     */
+    public int getMaxAttemptsPerMob() {
+        return config.getInt("taming.max-attempts-per-mob", 0);
+    }
+
+    // ─── Pet Scale Override ─────────────────────────────────────
+
+    /**
+     * Returns the scale override for a pet mob type (e.g. WITHER -> 0.7).
+     * Returns 1.0 if no override is configured.
+     */
+    public double getPetScaleOverride(@NotNull String mobType) {
+        return config.getDouble("taming.scale-overrides." + mobType.toUpperCase(), 1.0);
     }
 
     // ─── Reroll Items ────────────────────────────────────────────
@@ -246,16 +322,54 @@ public final class ConfigManager {
      */
     @NotNull
     public Map<String, double[]> getPetBaseValues(@NotNull String mobTypeName) {
-        ConfigurationSection section = config.getConfigurationSection(
-                "pet-base-values." + mobTypeName);
-        if (section == null) {
+        String upperMobType = mobTypeName.toUpperCase();
+        ConfigurationSection baseSection = config.getConfigurationSection("pet-base-values");
+        if (baseSection == null) {
             return Collections.emptyMap();
         }
 
+        // Priority 1: Check special sections first
+        ConfigurationSection specialSection = baseSection.getConfigurationSection("special");
+        if (specialSection != null) {
+            for (String specialKey : specialSection.getKeys(false)) {
+                ConfigurationSection entry = specialSection.getConfigurationSection(specialKey);
+                if (entry == null) {
+                    continue;
+                }
+                List<String> types = entry.getStringList("types");
+                if (types.stream().anyMatch(t -> t.equalsIgnoreCase(upperMobType))) {
+                    return parseStatSection(entry.getConfigurationSection("stats"));
+                }
+            }
+        }
+
+        // Priority 2: Check tier sections
+        for (String tierKey : baseSection.getKeys(false)) {
+            if ("special".equals(tierKey)) {
+                continue;
+            }
+            ConfigurationSection tierSection = baseSection.getConfigurationSection(tierKey);
+            if (tierSection == null) {
+                continue;
+            }
+            List<String> types = tierSection.getStringList("types");
+            if (types.stream().anyMatch(t -> t.equalsIgnoreCase(upperMobType))) {
+                return parseStatSection(tierSection.getConfigurationSection("stats"));
+            }
+        }
+
+        return Collections.emptyMap();
+    }
+
+    @NotNull
+    private Map<String, double[]> parseStatSection(@Nullable ConfigurationSection statsSection) {
+        if (statsSection == null) {
+            return Collections.emptyMap();
+        }
         Map<String, double[]> result = new java.util.LinkedHashMap<>();
-        for (String statName : section.getKeys(false)) {
-            double min = section.getDouble(statName + ".min", 0.0);
-            double max = section.getDouble(statName + ".max", min);
+        for (String statName : statsSection.getKeys(false)) {
+            double min = statsSection.getDouble(statName + ".min", 0.0);
+            double max = statsSection.getDouble(statName + ".max", min);
             result.put(statName, new double[]{min, max});
         }
         return Collections.unmodifiableMap(result);
@@ -281,6 +395,35 @@ public final class ConfigManager {
         return config.getString("levelledmobs.pdc-key", "level");
     }
 
+    // ─── Equipment ──────────────────────────────────────────────
+
+    /**
+     * Returns the required bond level to unlock an equipment slot.
+     * Defaults to 1 (always unlocked) if not configured.
+     */
+    public int getEquipmentSlotRequiredBondLevel(@NotNull String slot) {
+        return config.getInt("equipment.slot-unlock." + slot, 1);
+    }
+
+    /**
+     * Returns the default stat bonuses for an item material in a given slot.
+     * Returns an empty map if no default effects are configured for this material/slot.
+     */
+    @NotNull
+    public Map<String, Double> getEquipmentDefaultEffects(@NotNull String slot,
+                                                           @NotNull String materialName) {
+        ConfigurationSection section = config.getConfigurationSection(
+                "equipment.default-effects." + slot + "." + materialName);
+        if (section == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, Double> result = new java.util.LinkedHashMap<>();
+        for (String statName : section.getKeys(false)) {
+            result.put(statName, section.getDouble(statName, 0.0));
+        }
+        return Collections.unmodifiableMap(result);
+    }
+
     // ─── Generic Accessors ───────────────────────────────────────
 
     @NotNull
@@ -302,6 +445,51 @@ public final class ConfigManager {
     @NotNull
     public FileConfiguration getConfig() {
         return config;
+    }
+
+    // ─── Sub-Config Merging ─────────────────────────────────────
+
+    /**
+     * Loads a sub-config file and deep-merges all its keys into the target config.
+     * Saves the default resource if the file doesn't exist on disk.
+     */
+    private void mergeSubConfig(@NotNull FileConfiguration target, @NotNull String fileName) {
+        // Save default resource if file doesn't exist
+        File file = new File(plugin.getDataFolder(), fileName);
+        if (!file.exists()) {
+            try {
+                plugin.saveResource(fileName, false);
+            } catch (IllegalArgumentException e) {
+                logger.warning("[Config] Sub-config resource not found in jar: " + fileName);
+                return;
+            }
+        }
+
+        YamlConfiguration subConfig = YamlConfiguration.loadConfiguration(file);
+        deepMerge(target, subConfig);
+        logger.fine("[Config] Merged sub-config: " + fileName);
+    }
+
+    /**
+     * Deep-merges all keys from source into target.
+     * For ConfigurationSection values, recursively merges nested keys.
+     * For leaf values, sets them directly.
+     */
+    private void deepMerge(@NotNull ConfigurationSection target,
+                           @NotNull ConfigurationSection source) {
+        for (String key : source.getKeys(false)) {
+            Object value = source.get(key);
+            if (value instanceof ConfigurationSection sourceSection) {
+                ConfigurationSection targetSection = target.getConfigurationSection(key);
+                if (targetSection == null) {
+                    target.set(key, value);
+                } else {
+                    deepMerge(targetSection, sourceSection);
+                }
+            } else {
+                target.set(key, value);
+            }
+        }
     }
 
     // ─── Internal Helpers ────────────────────────────────────────
@@ -352,17 +540,22 @@ public final class ConfigManager {
     }
 
     private boolean matchesLevelRange(@NotNull String rangeKey, int level) {
-        if (rangeKey.endsWith("+")) {
-            int min = Integer.parseInt(rangeKey.replace("+", ""));
-            return level >= min;
+        try {
+            if (rangeKey.endsWith("+")) {
+                int min = Integer.parseInt(rangeKey.replace("+", ""));
+                return level >= min;
+            }
+            String[] parts = rangeKey.split("-");
+            if (parts.length == 2) {
+                int min = Integer.parseInt(parts[0]);
+                int max = Integer.parseInt(parts[1]);
+                return level >= min && level <= max;
+            }
+            return false;
+        } catch (NumberFormatException e) {
+            logger.warning("[Config] Invalid level range key: " + rangeKey);
+            return false;
         }
-        String[] parts = rangeKey.split("-");
-        if (parts.length == 2) {
-            int min = Integer.parseInt(parts[0]);
-            int max = Integer.parseInt(parts[1]);
-            return level >= min && level <= max;
-        }
-        return false;
     }
 
     @NotNull

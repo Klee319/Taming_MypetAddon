@@ -9,9 +9,10 @@ softdepend:
   - LevelledMobs
   - MythicMobs
 commands:
-  petname:
+  pettame:
     description: "Name a pending tamed monster"
-    usage: "/petname <name>"
+    usage: "/pettame <name>"
+    aliases: [petclaim]
   petstatus:
     description: "Show pet status"
     usage: "/petstatus"
@@ -27,6 +28,14 @@ commands:
   petdex:
     description: "Open pet encyclopedia"
     usage: "/petdex"
+  petrelease:
+    description: "Release your pet (GUI confirmation)"
+    usage: "/petrelease"
+    aliases: [mprelease, petfree]
+  petst:
+    description: "View pet skilltree skills"
+    usage: "/petst"
+    aliases: [mpskill]
 permissions:
   mypetaddon.*:
     description: "All MyPetAddon permissions"
@@ -38,6 +47,8 @@ permissions:
       mypetaddon.encyclopedia: true
       mypetaddon.evolve: true
       mypetaddon.admin: true
+      mypetaddon.release: true
+      mypetaddon.skill: true
   mypetaddon.tame:
     description: "Allows taming pets"
     default: true
@@ -52,6 +63,12 @@ permissions:
     default: true
   mypetaddon.evolve:
     description: "Allows evolving pets"
+    default: true
+  mypetaddon.release:
+    description: "Allows releasing pets"
+    default: true
+  mypetaddon.skill:
+    description: "Allows viewing pet skilltree"
     default: true
   mypetaddon.admin:
     description: "Admin commands"

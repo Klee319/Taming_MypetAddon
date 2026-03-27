@@ -1,0 +1,149 @@
+# ============================================================================
+#  MyPetAddon - メッセージ・サウンド・図鑑設定
+#  図鑑GUI、サウンド効果、全メッセージテンプレートを管理します。
+#  変更後は /mypetaddon reload で反映してください。
+# ============================================================================
+
+encyclopedia:
+  gui:
+    # GUI タイトル
+    title: "§8§lペット図鑑"
+    # GUI の行数 (1-6)
+    rows: 6
+    # ソート方法 (NAME, RARITY, BOND_LEVEL, TAME_DATE)
+    sort: "NAME"
+
+  # --- コンプリート報酬 ---
+  completion-rewards:
+    25:
+      # 25% 達成時の報酬コマンド (%player% はプレイヤー名に置換)
+      commands:
+        - "give %player% diamond 5"
+      message: "§a図鑑25%%達成！ダイヤモンド5個を獲得しました！"
+    50:
+      commands:
+        - "give %player% diamond 10"
+        - "give %player% golden_apple 10"
+      message: "§a図鑑50%%達成！ダイヤモンド10個と金リンゴ10個を獲得しました！"
+    75:
+      commands:
+        - "give %player% nether_star 1"
+        - "give %player% enchanted_golden_apple 1"
+      message: "§6図鑑75%%達成！ネザースターとエンチャント金リンゴを獲得しました！"
+    100:
+      commands:
+        - "give %player% nether_star 3"
+        - "give %player% elytra 1"
+        - "give %player% totem_of_undying 1"
+      message: "§d§l図鑑100%%達成！伝説の報酬を獲得しました！"
+
+# --------------------------------------------------------------------------
+# サウンド設定
+# --------------------------------------------------------------------------
+sounds:
+  # テイミング成功
+  tame-success:
+    sound: "ENTITY_PLAYER_LEVELUP"
+    volume: 1.0
+    pitch: 1.2
+  # モンスターテイミング準備完了
+  tame-monster-ready:
+    sound: "BLOCK_NOTE_BLOCK_CHIME"
+    volume: 1.0
+    pitch: 1.5
+  # 進化成功
+  evolution-success:
+    sound: "UI_TOAST_CHALLENGE_COMPLETE"
+    volume: 1.0
+    pitch: 1.0
+  # レアリティアップグレード
+  rarity-upgrade:
+    sound: "ENTITY_ENDER_DRAGON_GROWL"
+    volume: 1.0
+    pitch: 1.5
+
+# --------------------------------------------------------------------------
+# メッセージ設定
+# --------------------------------------------------------------------------
+messages:
+  # --- プレフィックス ---
+  prefix: "§8[§bMyPet§eAddon§8]§r "
+
+  # --- テイミング ---
+  tame-success: "§a%pet_name% §7をテイミングしました！ (レアリティ: %rarity%, 性格: %personality%)"
+  tame-fail: "§cテイミングに失敗しました..."
+  tame-fail-rate: "§cテイミングに失敗しました... (成功率: §f%rate%%§c)"
+  tame-excluded: "§cこのモブはテイミングできません。"
+  tame-monster-start: "§eモンスターテイミングを開始しました。§f%timeout%秒§e以内にチャットで名前を入力してください。"
+  tame-monster-naming: "§aペットの名前を入力してください (§f%command%§a を使用)"
+  tame-monster-timeout: "§c名前入力の時間切れです。テイミングがキャンセルされました。"
+  tame-already-targeting: "§c既に別のモブをテイミング中です。"
+  tame-mythicmob-blocked: "§cこのMythicMobはテイミングできません。"
+
+  # --- レアリティ ---
+  rarity-display: "§7レアリティ: %rarity_colored%"
+  rarity-upgrade-success: "§6レアリティが §r%old_rarity% §6から §r%new_rarity% §6にアップグレードしました！"
+  rarity-upgrade-fail: "§cレアリティのアップグレードに失敗しました。"
+  rarity-already-max: "§cこのペットは既に最高レアリティです。"
+  rarity-reroll-success: "§eレアリティを再抽選しました！ 結果: %rarity_colored%"
+
+  # --- 性格 ---
+  personality-display: "§7性格: §f%personality_name% §8- §7%personality_desc%"
+
+  # --- 絆 ---
+  bond-level-up: "§d%pet_name% §7との絆がレベル §f%bond_level% §7に上がりました！ ボーナス: §f%bond_bonus%"
+  bond-display: "§7絆レベル: §f%bond_level% §8(§7%bond_exp%/%bond_next%§8)"
+  bond-decay-warning: "§e長い間ペットと触れ合っていません。絆が少し下がりました。"
+  bond-pet-death: "§c%pet_name% が倒されました。絆が §f%bond_loss% §c減少しました。"
+
+  # --- 進化 ---
+  evolution-available: "§6%pet_name% は進化条件を満たしています！ §e/pet evolve §6で進化させましょう。"
+  evolution-success: "§d§l%pet_name% が %target_type% に進化しました！"
+  evolution-fail-level: "§c進化にはレベル §f%required_level% §c以上が必要です。(現在: §f%current_level%§c)"
+  evolution-fail-bond: "§c進化には絆レベル §f%required_bond% §c以上が必要です。(現在: §f%current_bond%§c)"
+  evolution-fail-biome: "§c進化には §f%required_biome% §cバイオームにいる必要があります。"
+  evolution-fail-item: "§c進化には §f%required_item% x%required_amount% §cが必要です。"
+  evolution-not-available: "§cこのペットには進化先がありません。"
+
+  # --- スキルツリー ---
+  skilltree-reroll-success: "§eスキルツリーを再抽選しました！"
+
+  # --- 装備 ---
+  equip-success: "§a%pet_name% に §f%item_name% §aを装備しました。(スロット: §f%slot%§a)"
+  equip-remove: "§7%pet_name% から §f%item_name% §7を取り外しました。"
+  equip-slot-full: "§cそのスロットには既に装備があります。"
+  equip-invalid-slot: "§c無効な装備スロットです。"
+
+  # --- 図鑑 ---
+  encyclopedia-open: "§7ペット図鑑を開いています..."
+  encyclopedia-progress: "§7図鑑コンプリート率: §f%percent%%%"
+  encyclopedia-complete: "§6§l全ペットの図鑑をコンプリートしました！"
+  encyclopedia-reward: "§a図鑑 §f%percent%%% §a達成報酬を受け取りました！"
+
+  # --- ステータス ---
+  status-header: "§8§m----------§r §b%pet_name% のステータス §8§m----------"
+  status-type: "§7種類: §f%pet_type%"
+  status-rarity: "§7レアリティ: %rarity_colored%"
+  status-personality: "§7性格: §f%personality%"
+  status-bond: "§7絆: Lv.§f%bond_level% §8(§7%bond_exp%§8)"
+  status-life: "§7体力: §c%life%"
+  status-damage: "§7攻撃力: §c%damage%"
+  status-footer: "§8§m------------------------------------------"
+
+  # --- リロール ---
+  reroll-item-missing: "§c%item_name% が必要です。"
+  reroll-confirm: "§eリロールを実行しますか？ §f/pet confirm §eで確定してください。"
+  reroll-cancel: "§7リロールをキャンセルしました。"
+
+  # --- 管理コマンド ---
+  admin-reload: "§a設定ファイルをリロードしました。"
+  admin-reload-fail: "§cリロードに失敗しました。コンソールを確認してください。"
+  admin-set-rarity: "§a%player% の %pet_name% のレアリティを %rarity% に設定しました。"
+  admin-set-bond: "§a%player% の %pet_name% の絆を %bond% に設定しました。"
+
+  # --- 汎用 ---
+  no-permission: "§cその操作を行う権限がありません。"
+  no-pet: "§cアクティブなペットがいません。ペットを召喚してください。"
+  player-only: "§cこのコマンドはプレイヤーのみ使用できます。"
+  unknown-command: "§c不明なコマンドです。§f/pet help §cでヘルプを確認してください。"
+  error-generic: "§cエラーが発生しました。管理者に問い合わせてください。"

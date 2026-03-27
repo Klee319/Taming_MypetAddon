@@ -1,0 +1,111 @@
+{
+  "Order": 33,
+  "Description": [
+    "- <dark_green><bold>沼地の猛毒 (毒超強化)",
+    "- <red><bold>毒矢遠距離攻撃",
+    "- <red><bold>鈍足",
+    "- <blue><bold>スプリント"
+  ],
+  "Skills": {
+    "Poison": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+5",
+          "Chance": "+39"
+        },
+        "20": {
+          "Duration": "+3",
+          "Chance": "+26"
+        },
+        "42": {
+          "Duration": "+2",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Ranged": {
+      "Upgrades": {
+        "5": {
+          "Rate": "+35",
+          "Damage": "+2",
+          "Projectile": "Arrow"
+        },
+        "30": {
+          "Rate": "+20",
+          "Damage": "+2"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+4",
+          "Chance": "+32"
+        },
+        "35": {
+          "Duration": "+2",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "15": {
+          "Damage": "+2"
+        },
+        "50": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "20": {
+          "Health": "+4"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Pickup": {
+      "Upgrades": {
+        "35": {
+          "Range": "+2",
+          "Exp": false
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "BOGGED"
+  ],
+  "ID": "SwampToxin",
+  "Icon": {
+    "Material": "slime_ball",
+    "Glowing": true
+  },
+  "Name": "スワンプトキシン"
+}

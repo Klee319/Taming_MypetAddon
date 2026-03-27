@@ -153,7 +153,8 @@ public final class MigrationManager {
                 0,    // bond exp
                 0,    // original LM level (unknown for legacy)
                 now,
-                null  // not evolved
+                null, // not evolved
+                0.0   // no captured scale for legacy pets
         );
 
         PetStats petStats = new PetStats(addonPetId, baseValues, upgradedValues);

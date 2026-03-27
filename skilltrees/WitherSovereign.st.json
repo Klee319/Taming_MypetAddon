@@ -1,0 +1,163 @@
+{
+  "Order": 50,
+  "Description": [
+    "- <dark_gray><bold>凋落の王 (ウィザースカル砲撃)",
+    "- <red><bold>死の炎 + 衰弱",
+    "- <green><bold>不死の再生 (超HP + 回復)",
+    "- <yellow><bold>ビーコン (力 + 耐性 + 再生)"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+50",
+          "Damage": "+6",
+          "Projectile": "WitherSkull"
+        },
+        "15": {
+          "Rate": "+30",
+          "Damage": "+4"
+        },
+        "30": {
+          "Rate": "+20",
+          "Damage": "+4"
+        },
+        "50": {
+          "Damage": "+4"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "1": {
+          "Health": "+10"
+        },
+        "15": {
+          "Health": "+10"
+        },
+        "30": {
+          "Health": "+10"
+        },
+        "50": {
+          "Health": "+12"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "5": {
+          "Timer": "+20",
+          "Health": "+6"
+        },
+        "25": {
+          "Health": "+6"
+        },
+        "42": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Fire": {
+      "Upgrades": {
+        "10": {
+          "Duration": "+6",
+          "Chance": "+52"
+        },
+        "35": {
+          "Duration": "+4",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "20": {
+          "Reflection": "+30",
+          "Chance": "+39"
+        },
+        "42": {
+          "Reflection": "+20",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "10": {
+          "Damage": "+4"
+        },
+        "25": {
+          "Damage": "+4"
+        },
+        "50": {
+          "Damage": "+4"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "35": {
+          "Buffs": {
+            "Strength": "+2",
+            "Resistance": "+1"
+          },
+          "Duration": "+12",
+          "Count": "+1",
+          "Range": "+10"
+        },
+        "50": {
+          "Buffs": {
+            "Regeneration": "+2"
+          },
+          "Duration": "+8",
+          "Count": "+1",
+          "Range": "+5"
+        }
+      }
+    },
+    "Knockback": {
+      "Upgrades": {
+        "20": {
+          "Chance": "+39"
+        }
+      }
+    },
+    "Ride": {
+      "Upgrades": {
+        "30": {
+          "Speed": "+5",
+          "Active": true,
+          "JumpHeight": "+2",
+          "CanFly": true
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "10": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "WITHER"
+  ],
+  "ID": "WitherSovereign",
+  "Icon": {
+    "Material": "nether_star",
+    "Glowing": true
+  },
+  "Name": "ウィザーソブリン"
+}

@@ -1,0 +1,112 @@
+{
+  "Order": 43,
+  "Description": [
+    "- <gold><bold>黄金の亡者 (炎上 + ダメージ)",
+    "- <red><bold>トゲの鎧",
+    "- <yellow><bold>ビーコン (力)",
+    "- <green><bold>HP増加"
+  ],
+  "Skills": {
+    "Fire": {
+      "Upgrades": {
+        "1": {
+          "Duration": "+5",
+          "Chance": "+39"
+        },
+        "30": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Damage": {
+      "Upgrades": {
+        "5": {
+          "Damage": "+2"
+        },
+        "20": {
+          "Damage": "+3"
+        },
+        "35": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "10": {
+          "Reflection": "+25",
+          "Chance": "+26"
+        },
+        "42": {
+          "Reflection": "+15",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "15": {
+          "Health": "+5"
+        },
+        "50": {
+          "Health": "+6"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "25": {
+          "Buffs": {
+            "Strength": "+2"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "35": {
+          "Timer": "+35",
+          "Health": "+3"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "30": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ZombifiedPiglin"
+  ],
+  "ID": "GoldenUndead",
+  "Icon": {
+    "Material": "gold_ingot",
+    "Glowing": true
+  },
+  "Name": "ゴールデンアンデッド"
+}

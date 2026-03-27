@@ -24,11 +24,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Manages pet equipment with 3 slots (HELMET, CHEST, ACCESSORY).
+ * Manages pet equipment with 6 slots (HEAD, CHEST, LEGS, FEET, WEAPON, ACCESSORY).
  * Handles serialization/deserialization via BukkitObjectOutputStream -> Base64
  * and persistence via the pet_equipment table.
  *
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
 public final class EquipmentManager {
 
     /** Valid equipment slot names. */
-    public static final Set<String> VALID_SLOTS = Set.of("HELMET", "CHEST", "ACCESSORY");
+    public static final Set<String> VALID_SLOTS = Set.of("HEAD", "CHEST", "ACCESSORY");
 
     /** Stat PDC key prefix: NamespacedKey("mypetaddon", "stat_<statName>") */
     private static final String PDC_STAT_PREFIX = "stat_";
@@ -46,6 +47,9 @@ public final class EquipmentManager {
     private final ConfigManager configManager;
     private final DatabaseManager databaseManager;
     private final Logger logger;
+
+    /** In-memory equipment cache: addonPetId -> (slot -> ItemStack). */
+    private final Map<UUID, Map<String, ItemStack>> equipmentCache = new ConcurrentHashMap<>();
 
     public EquipmentManager(@NotNull MyPetAddonPlugin plugin,
                             @NotNull ConfigManager configManager,
@@ -125,6 +129,9 @@ public final class EquipmentManager {
             ps.setString(2, slot);
             ps.setString(3, serialized);
             ps.executeUpdate();
+            // Update cache
+            equipmentCache.computeIfAbsent(addonPetId, k -> new ConcurrentHashMap<>())
+                    .put(slot, item.clone());
             return true;
         } catch (Exception e) {
             logger.log(Level.WARNING, "[Equipment] Failed to equip item in slot " + slot
@@ -183,6 +190,12 @@ public final class EquipmentManager {
             // Item was already loaded; return it anyway to avoid loss
         }
 
+        // Update cache
+        Map<String, ItemStack> cached = equipmentCache.get(addonPetId);
+        if (cached != null) {
+            cached.remove(slot);
+        }
+
         return item;
     }
 
@@ -196,8 +209,15 @@ public final class EquipmentManager {
      */
     @NotNull
     public Map<String, ItemStack> getEquipment(@NotNull UUID addonPetId) {
+        // Check cache first
+        Map<String, ItemStack> cached = equipmentCache.get(addonPetId);
+        if (cached != null) {
+            return Collections.unmodifiableMap(new LinkedHashMap<>(cached));
+        }
+
+        // Cache miss — load from DB
         String sql = "SELECT slot, item_data FROM pet_equipment WHERE addon_pet_id = ?";
-        Map<String, ItemStack> result = new LinkedHashMap<>();
+        Map<String, ItemStack> result = new ConcurrentHashMap<>();
 
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -215,7 +235,16 @@ public final class EquipmentManager {
             logger.log(Level.WARNING, "[Equipment] Failed to load equipment for pet " + addonPetId, e);
         }
 
-        return Collections.unmodifiableMap(result);
+        // Populate cache
+        equipmentCache.put(addonPetId, result);
+        return Collections.unmodifiableMap(new LinkedHashMap<>(result));
+    }
+
+    /**
+     * Invalidates the equipment cache for a pet (e.g. on pet removal).
+     */
+    public void invalidateCache(@NotNull UUID addonPetId) {
+        equipmentCache.remove(addonPetId);
     }
 
     /**
@@ -235,16 +264,28 @@ public final class EquipmentManager {
         NamespacedKey key = new NamespacedKey(plugin, PDC_STAT_PREFIX + statName);
         double totalBonus = 0.0;
 
-        for (ItemStack item : equipment.values()) {
+        for (Map.Entry<String, ItemStack> entry : equipment.entrySet()) {
+            String slot = entry.getKey();
+            ItemStack item = entry.getValue();
             ItemMeta meta = item.getItemMeta();
             if (meta == null) {
                 continue;
             }
 
+            // Priority 1: PDC tags (custom items)
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
             Double bonus = pdc.get(key, PersistentDataType.DOUBLE);
             if (bonus != null) {
                 totalBonus += bonus;
+                continue;
+            }
+
+            // Priority 2: Default effects from config (vanilla items)
+            Map<String, Double> defaults = configManager.getEquipmentDefaultEffects(
+                    slot, item.getType().name());
+            Double defaultBonus = defaults.get(statName);
+            if (defaultBonus != null) {
+                totalBonus += defaultBonus;
             }
         }
 

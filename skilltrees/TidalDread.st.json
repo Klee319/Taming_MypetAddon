@@ -1,0 +1,112 @@
+{
+  "Order": 31,
+  "Description": [
+    "- <aqua><bold>深海の脅威 (トライデント遠距離)",
+    "- <yellow><bold>水中呼吸ビーコン",
+    "- <red><bold>潮の障壁 (トゲ)",
+    "- <green><bold>HP増加"
+  ],
+  "Skills": {
+    "Ranged": {
+      "Upgrades": {
+        "1": {
+          "Rate": "+40",
+          "Damage": "+4",
+          "Projectile": "Arrow"
+        },
+        "20": {
+          "Rate": "+25",
+          "Damage": "+3"
+        },
+        "42": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "10": {
+          "Reflection": "+25",
+          "Chance": "+32"
+        },
+        "35": {
+          "Reflection": "+15",
+          "Chance": "+15"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+5"
+        },
+        "25": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "30": {
+          "Buffs": {
+            "WaterBreathing": true,
+            "Resistance": "+1"
+          },
+          "Duration": "+12",
+          "Count": "+1",
+          "Range": "+10"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "15": {
+          "Duration": "+3",
+          "Chance": "+26"
+        }
+      }
+    },
+    "Heal": {
+      "Upgrades": {
+        "50": {
+          "Timer": "+30",
+          "Health": "+5"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "30": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "DROWNED"
+  ],
+  "ID": "TidalDread",
+  "Icon": {
+    "Material": "trident",
+    "Glowing": true
+  },
+  "Name": "タイダルドレッド"
+}

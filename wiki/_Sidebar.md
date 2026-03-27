@@ -1,6 +1,6 @@
 ## MyPetAddon Wiki
 
-- [Home](Home)
+- [ホーム](Home)
 
 ### プレイヤーガイド
 - [はじめかた](Getting-Started)

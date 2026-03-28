@@ -1,12 +1,21 @@
 # ============================================================================
 #  MyPetAddon - ペット基本ステータス設定
 #  モブタイプごとの基礎ステータス (Life/Damage/Speed) の範囲を定義します。
+#  ティアは「友好モブ」と「敵対モブ」に分かれています。
+#  ティアが高いほどステータスが高く設定されています。
+#  ティア基準: モブの強さ + バニラでの希少性（見つけにくさ）
 #  変更後は /mypetaddon reload で反映してください。
 # ============================================================================
 
 pet-base-values:
-  # --- ティア1: 弱い一般モブ ---
-  tier-1:
+
+  # ========================================================================
+  #  友好モブ (Friendly Mobs)
+  # ========================================================================
+
+  # --- 友好ティア1: 小型・よく見かける友好モブ ---
+  # 魚類、小動物など。弱いが入手しやすい
+  friendly-tier-1:
     types:
       - "CHICKEN"
       - "RABBIT"
@@ -14,144 +23,214 @@ pet-base-values:
       - "SALMON"
       - "TROPICAL_FISH"
       - "PUFFERFISH"
-      - "BAT"
-      - "SILVERFISH"
-      - "ENDERMITE"
+      - "TADPOLE"
       - "SQUID"
       - "GLOW_SQUID"
-      - "TADPOLE"
+      - "BAT"
+      - "FROG"
     stats:
       Life:
-        min: 10.0
-        max: 20.0
+        min: 8.0
+        max: 18.0
       Damage:
         min: 1.0
-        max: 3.0
+        max: 2.0
       Speed:
         min: 0.20
-        max: 0.30
+        max: 0.28
 
-  # --- ティア2: 一般的な動物 ---
-  tier-2:
+  # --- 友好ティア2: 一般的な友好モブ ---
+  # 牧場動物、よく見る中型モブ
+  friendly-tier-2:
     types:
       - "PIG"
       - "COW"
       - "SHEEP"
-      - "HORSE"
       - "DONKEY"
       - "MULE"
       - "LLAMA"
+      - "TRADER_LLAMA"
       - "CAT"
-      - "WOLF"
-      - "FOX"
-      - "OCELOT"
       - "PARROT"
-      - "TURTLE"
-      - "FROG"
       - "GOAT"
-      - "CAMEL"
-      - "SNIFFER"
       - "ARMADILLO"
-      - "ALLAY"
-      - "AXOLOTL"
-      - "BEE"
-      - "DOLPHIN"
-      - "MOOSHROOM"
-      - "PANDA"
-      - "POLAR_BEAR"
-      - "STRIDER"
-      - "COPPER_GOLEM"
-      - "ZOMBIE_HORSE"
-      - "SKELETON_HORSE"
-      - "SNOW_GOLEM"
-    stats:
-      Life:
-        min: 20.0
-        max: 40.0
-      Damage:
-        min: 2.0
-        max: 5.0
-      Speed:
-        min: 0.22
-        max: 0.32
-
-  # --- ティア3: 一般的な敵対モブ ---
-  tier-3:
-    types:
-      - "ZOMBIE"
-      - "SKELETON"
-      - "SPIDER"
-      - "CREEPER"
-      - "SLIME"
-      - "ENDERMAN"
-      - "CAVE_SPIDER"
-      - "DROWNED"
-      - "HUSK"
-      - "STRAY"
-      - "PHANTOM"
-      - "PILLAGER"
-      - "VINDICATOR"
-      - "WITCH"
-      - "MAGMA_CUBE"
-      - "CREAKING"
-      - "HOGLIN"
-      - "PIGLIN"
-      - "PIGLIN_BRUTE"
-      - "ZOMBIFIED_PIGLIN"
-      - "ZOMBIE_VILLAGER"
-      - "BOGGED"
-      - "ZOGLIN"
     stats:
       Life:
         min: 15.0
         max: 30.0
       Damage:
+        min: 2.0
+        max: 4.0
+      Speed:
+        min: 0.22
+        max: 0.30
+
+  # --- 友好ティア3: やや希少・特殊能力持ちの友好モブ ---
+  # 特定バイオーム限定、戦闘能力あり
+  friendly-tier-3:
+    types:
+      - "HORSE"
+      - "FOX"
+      - "OCELOT"
+      - "TURTLE"
+      - "CAMEL"
+      - "SNIFFER"
+      - "PANDA"
+      # WOLF と BEE は special セクションで個別定義済み
+    stats:
+      Life:
+        min: 25.0
+        max: 45.0
+      Damage:
+        min: 3.0
+        max: 6.0
+      Speed:
+        min: 0.24
+        max: 0.34
+
+  # --- 友好ティア4: レア・強力な友好モブ ---
+  # 特定環境のみ、優秀なステータス
+  friendly-tier-4:
+    types:
+      - "DOLPHIN"
+      - "POLAR_BEAR"
+      - "MOOSHROOM"
+      - "AXOLOTL"
+      - "ALLAY"
+      - "STRIDER"
+    stats:
+      Life:
+        min: 35.0
+        max: 60.0
+      Damage:
         min: 4.0
-        max: 8.0
+        max: 7.0
+      Speed:
+        min: 0.26
+        max: 0.36
+
+  # --- 友好ティア5: 非常に希少な友好モブ ---
+  # 特殊な入手経路、高い基礎ステータス
+  friendly-tier-5:
+    types:
+      - "IRON_GOLEM"
+      - "SNOW_GOLEM"
+      - "SKELETON_HORSE"
+      - "ZOMBIE_HORSE"
+    stats:
+      Life:
+        min: 50.0
+        max: 80.0
+      Damage:
+        min: 5.0
+        max: 10.0
       Speed:
         min: 0.25
         max: 0.35
 
-  # --- ティア4: 強力な敵対モブ ---
-  tier-4:
+  # ========================================================================
+  #  敵対モブ (Hostile Mobs)
+  # ========================================================================
+
+  # --- 敵対ティア1: 弱い・序盤でよく遭遇する敵対モブ ---
+  # オーバーワールド地上の基本的な敵
+  hostile-tier-1:
     types:
+      - "ZOMBIE"
+      - "SKELETON"
+      - "SPIDER"
+      - "SLIME"
+      - "SILVERFISH"
+      - "ENDERMITE"
+      - "CAVE_SPIDER"
+      - "DROWNED"
+      - "BOGGED"
+    stats:
+      Life:
+        min: 15.0
+        max: 25.0
+      Damage:
+        min: 3.0
+        max: 6.0
+      Speed:
+        min: 0.24
+        max: 0.32
+
+  # --- 敵対ティア2: 中級敵対モブ ---
+  # バリエーションモブ、やや危険
+  hostile-tier-2:
+    types:
+      - "CREEPER"
+      - "HUSK"
+      - "STRAY"
+      - "PHANTOM"
+      - "WITCH"
+      - "MAGMA_CUBE"
+      - "HOGLIN"
+      - "ZOMBIE_VILLAGER"
+      - "ZOMBIFIED_PIGLIN"
+      - "PIGLIN"
+      - "CREAKING"
+    stats:
+      Life:
+        min: 20.0
+        max: 35.0
+      Damage:
+        min: 5.0
+        max: 9.0
+      Speed:
+        min: 0.25
+        max: 0.34
+
+  # --- 敵対ティア3: 強力な敵対モブ ---
+  # 高火力・特殊攻撃持ち、ネザー上位
+  hostile-tier-3:
+    types:
+      - "ENDERMAN"
       - "BLAZE"
+      - "GUARDIAN"
+      - "PILLAGER"
+      - "VINDICATOR"
+      - "PIGLIN_BRUTE"
+      - "ZOGLIN"
+      - "BREEZE"
+    stats:
+      Life:
+        min: 30.0
+        max: 55.0
+      Damage:
+        min: 7.0
+        max: 12.0
+      Speed:
+        min: 0.26
+        max: 0.36
+
+  # --- 敵対ティア4: ボス級敵対モブ ---
+  # 非常に危険、高ステータス
+  hostile-tier-4:
+    types:
       - "GHAST"
-      - "WITHER_SKELETON"
       - "EVOKER"
       - "RAVAGER"
-      - "GUARDIAN"
+      - "WITHER_SKELETON"
+      - "ELDER_GUARDIAN"
       - "VEX"
-      - "BREEZE"
-      - "IRON_GOLEM"
     stats:
       Life:
         min: 50.0
         max: 100.0
       Damage:
-        min: 6.0
-        max: 14.0
+        min: 10.0
+        max: 18.0
       Speed:
-        min: 0.25
+        min: 0.26
         max: 0.38
 
-  # --- ティア5: ボス級モブ ---
-  # ティア5: ボス級モブ（WITHER/WARDENはspecialで個別定義）
-  tier-5:
-    types:
-      - "ELDER_GUARDIAN"
-    stats:
-      Life:
-        min: 100.0
-        max: 150.0
-      Damage:
-        min: 12.0
-        max: 25.0
-      Speed:
-        min: 0.28
-        max: 0.40
+  # ========================================================================
+  #  特殊ティア (Special - 個別調整)
+  # ========================================================================
+  # 特定のモブは強さが極端、または特殊な扱いが必要なため個別定義
 
-  # --- 特殊ティア: 個別調整が必要なモブ ---
   special:
     wither:
       types:
@@ -180,6 +259,34 @@ pet-base-values:
         Speed:
           min: 0.30
           max: 0.45
+
+    charged-creeper:
+      types:
+        - "CHARGED_CREEPER"
+      stats:
+        Life:
+          min: 50.0
+          max: 80.0
+        Damage:
+          min: 10.0
+          max: 20.0
+        Speed:
+          min: 0.28
+          max: 0.38
+
+    illusioner:
+      types:
+        - "ILLUSIONER"
+      stats:
+        Life:
+          min: 80.0
+          max: 120.0
+        Damage:
+          min: 10.0
+          max: 18.0
+        Speed:
+          min: 0.28
+          max: 0.40
 
     wolf-bee:
       types:

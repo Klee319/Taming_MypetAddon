@@ -1,0 +1,133 @@
+{
+  "Order": 22,
+  "Description": [
+    "- <dark_purple><bold>幻術の達人 (トリッキー戦闘)",
+    "- <blue><bold>魔法障壁 (シールド)",
+    "- <green><bold>高体力 (幻影防御)",
+    "- <gold><bold>ビーコン (透明化+俊敏)"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+2"
+        },
+        "15": {
+          "Damage": "+2"
+        },
+        "30": {
+          "Damage": "+3"
+        },
+        "45": {
+          "Damage": "+2"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "1": {
+          "Health": "+6"
+        },
+        "10": {
+          "Health": "+5"
+        },
+        "25": {
+          "Health": "+6"
+        },
+        "40": {
+          "Health": "+5"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "5": {
+          "Duration": "+5",
+          "Chance": "+40"
+        },
+        "25": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Shield": {
+      "Upgrades": {
+        "10": {
+          "Chance": "+30",
+          "Redirect": "+20"
+        },
+        "35": {
+          "Chance": "+20",
+          "Redirect": "+15"
+        }
+      }
+    },
+    "Stomp": {
+      "Upgrades": {
+        "18": {
+          "Damage": "+3",
+          "Chance": "+30"
+        },
+        "40": {
+          "Damage": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "12": {
+          "Active": true
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "45": {
+          "Buffs": {
+            "Invisibility": "+1",
+            "Speed": "+2"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "5": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": false,
+          "Raid": false
+        },
+        "20": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "30": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "ILLUSIONER"
+  ],
+  "ID": "IllusionMaster",
+  "Icon": {
+    "Material": "ender_eye",
+    "Glowing": true
+  },
+  "Name": "イリュージョンマスター"
+}

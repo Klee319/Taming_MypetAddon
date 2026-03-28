@@ -532,6 +532,24 @@ skilltree-assignment:
         weight: 15
       - skilltree: "Combat"
         weight: 15
+    CHARGED_CREEPER:
+      - skilltree: "ThunderStrike"
+        weight: 60
+      - skilltree: "Assassin"
+        weight: 15
+      - skilltree: "NetherFlame"
+        weight: 15
+      - skilltree: "Combat"
+        weight: 10
+    ILLUSIONER:
+      - skilltree: "IllusionMaster"
+        weight: 60
+      - skilltree: "DarkSorcerer"
+        weight: 15
+      - skilltree: "Support"
+        weight: 15
+      - skilltree: "Ranger"
+        weight: 10
     COPPER_GOLEM:
       - skilltree: "Support"
         weight: 35

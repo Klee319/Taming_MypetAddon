@@ -93,6 +93,7 @@ public final class TamingManager {
     public record PendingName(
             @NotNull Entity dummyEntity,
             @NotNull EntityType entityType,
+            @NotNull String addonMobType,
             @NotNull Rarity rarity,
             @NotNull Personality personality,
             long timestamp,
@@ -223,9 +224,10 @@ public final class TamingManager {
         entity.setInvulnerable(true);
 
         // Store in pending names for /pettame command (include consumed item for refund)
+        String addonMobType = resolveAddonMobType(entity);
         pendingNames.put(player.getUniqueId(), new PendingName(
-                entity, entity.getType(), rarity, personality, System.currentTimeMillis(),
-                entityInfo, consumedItemCopy, capturedScale));
+                entity, entity.getType(), addonMobType, rarity, personality,
+                System.currentTimeMillis(), entityInfo, consumedItemCopy, capturedScale));
 
         // Notify player
         player.sendMessage("§a仲間にできそうだ！ "
@@ -386,9 +388,10 @@ public final class TamingManager {
         Personality personality = personalityManager.rollPersonality();
 
         // Store in pending names (capture entityType, visual info, and consumed item from original entity)
+        String addonMobType = resolveAddonMobType(entity);
         pendingNames.put(playerUuid, new PendingName(
-                dummyEntity, entity.getType(), rarity, personality, System.currentTimeMillis(),
-                entityInfo, pending.consumedItem(), capturedScale));
+                dummyEntity, entity.getType(), addonMobType, rarity, personality,
+                System.currentTimeMillis(), entityInfo, pending.consumedItem(), capturedScale));
 
         // Notify player
         tamingPlayer.sendMessage("§a敵が仲間になりたいようだ！ "
@@ -434,7 +437,8 @@ public final class TamingManager {
         }
 
         Entity dummyEntity = pending.dummyEntity();
-        String mobType = pending.entityType().name();
+        // Use addon-internal mob type (e.g. CHARGED_CREEPER) for config lookups
+        String mobType = pending.addonMobType();
         InactiveMyPet inactiveMyPet;
 
         // Always prefer captured entityInfo (from the original entity) over the dummy's
@@ -704,6 +708,21 @@ public final class TamingManager {
             }
         } catch (Exception ignored) {}
         return 0.0;
+    }
+
+    /**
+     * Resolves the addon-internal mob type for an entity.
+     * Handles special variants that are treated as distinct types
+     * (e.g. charged creeper → CHARGED_CREEPER).
+     */
+    @NotNull
+    private String resolveAddonMobType(@NotNull LivingEntity entity) {
+        String baseType = entity.getType().name();
+        // Charged Creeper is treated as a separate mob type
+        if (entity instanceof Creeper creeper && creeper.isPowered()) {
+            return "CHARGED_CREEPER";
+        }
+        return baseType;
     }
 
     /**

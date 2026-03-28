@@ -143,11 +143,11 @@ evolutions:
           Life: 1.15
           Damage: 1.10
 
-  # ─── ピリジャー → ウィンディケーター（一段階目） ───
+  # ─── ピリジャー → ヴィンディケーター / エヴォーカー（分岐進化） ───
   PILLAGER:
     branches:
       vindicator:
-        display-name: "§cウィンディケーター"
+        display-name: "§cヴィンディケーター"
         target: "VINDICATOR"
         fixed-skilltree: "RaidCaptain"
         conditions:
@@ -159,23 +159,36 @@ evolutions:
         stat-bonus:
           Life: 1.15
           Damage: 1.20
-
-  # ─── ウィンディケーター → エヴォーカー（二段階目） ───
-  VINDICATOR:
-    branches:
       evoker:
         display-name: "§dエヴォーカー"
         target: "EVOKER"
         fixed-skilltree: "DarkSorcerer"
         conditions:
-          min-level: 35
+          min-level: 30
           min-bond-level: 4
           required-biome: ""
-          required-item: "TOTEM_OF_UNDYING"
-          required-item-amount: 1
+          required-item: "EMERALD_BLOCK"
+          required-item-amount: 3
         stat-bonus:
           Life: 1.20
           Damage: 1.25
+
+  # ─── エヴォーカー → イリュージョナー ───
+  EVOKER:
+    branches:
+      illusioner:
+        display-name: "§5イリュージョナー"
+        target: "ILLUSIONER"
+        fixed-skilltree: "IllusionMaster"
+        conditions:
+          min-level: 40
+          min-bond-level: 5
+          required-biome: ""
+          required-item: "TOTEM_OF_UNDYING"
+          required-item-amount: 3
+        stat-bonus:
+          Life: 1.25
+          Damage: 1.30
 
   # ─── ホグリン → ゾグリン ───
   HOGLIN:

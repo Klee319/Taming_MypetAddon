@@ -39,6 +39,8 @@
 | **AbyssGuardian** | エルダーガーディアン |
 | **AbyssWarden** | ウォーデン |
 | **WitherSovereign** | ウィザー |
+| **ThunderStrike** (サンダーストライク) | 帯電クリーパー固有: 雷の力、爆発的バーストダメージ、電撃反射 |
+| **IllusionMaster** (イリュージョンマスター) | イリュージョナー固有: 幻術、魔法障壁、範囲攻撃 |
 
 ---
 
@@ -101,6 +103,24 @@
 | Assassin | 25 |
 | Combat | 15 |
 | PvP | 10 |
+
+**帯電クリーパー (CHARGED_CREEPER) の場合:**
+
+| スキルツリー | 重み |
+|-------------|------|
+| ThunderStrike | 60 |
+| Assassin | 15 |
+| NetherFlame | 15 |
+| Combat | 10 |
+
+**イリュージョナー (ILLUSIONER) の場合:**
+
+| スキルツリー | 重み |
+|-------------|------|
+| IllusionMaster | 60 |
+| DarkSorcerer | 15 |
+| Support | 15 |
+| Ranger | 10 |
 
 ---
 

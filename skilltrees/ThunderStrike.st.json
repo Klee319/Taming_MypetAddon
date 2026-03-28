@@ -1,0 +1,121 @@
+{
+  "Order": 21,
+  "Description": [
+    "- <yellow><bold>雷撃の力 (高バーストダメージ)",
+    "- <red><bold>トゲの鎧 (電撃反射)",
+    "- <aqua><bold>チェインライトニング (鈍足)",
+    "- <gold><bold>ビーコン (稲妻の祝福)"
+  ],
+  "Skills": {
+    "Damage": {
+      "Upgrades": {
+        "1": {
+          "Damage": "+4"
+        },
+        "10": {
+          "Damage": "+3"
+        },
+        "25": {
+          "Damage": "+4"
+        },
+        "40": {
+          "Damage": "+3"
+        },
+        "50": {
+          "Damage": "+3"
+        }
+      }
+    },
+    "Slow": {
+      "Upgrades": {
+        "8": {
+          "Duration": "+5",
+          "Chance": "+35"
+        },
+        "30": {
+          "Duration": "+3",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Thorns": {
+      "Upgrades": {
+        "12": {
+          "Reflection": "+30",
+          "Chance": "+35"
+        },
+        "35": {
+          "Reflection": "+25",
+          "Chance": "+20"
+        }
+      }
+    },
+    "Life": {
+      "Upgrades": {
+        "5": {
+          "Health": "+4"
+        },
+        "20": {
+          "Health": "+4"
+        },
+        "40": {
+          "Health": "+3"
+        }
+      }
+    },
+    "Sprint": {
+      "Upgrades": {
+        "8": {
+          "Active": true
+        }
+      }
+    },
+    "Beacon": {
+      "Upgrades": {
+        "45": {
+          "Buffs": {
+            "Speed": "+2",
+            "Strength": "+2"
+          },
+          "Duration": "+10",
+          "Count": "+1",
+          "Range": "+8"
+        }
+      }
+    },
+    "Behavior": {
+      "Upgrades": {
+        "1": {
+          "Friend": false,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": false
+        },
+        "15": {
+          "Friend": true,
+          "Farm": false,
+          "Duel": true,
+          "Aggro": true,
+          "Raid": true
+        }
+      }
+    },
+    "Control": {
+      "Upgrades": {
+        "25": {
+          "Active": true
+        }
+      }
+    }
+  },
+  "MobTypes": [
+    "CREEPER"
+  ],
+  "ID": "ThunderStrike",
+  "Icon": {
+    "Material": "lightning_rod",
+    "Glowing": true
+  },
+  "Name": "サンダーストライク"
+}

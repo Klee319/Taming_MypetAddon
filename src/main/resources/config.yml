@@ -76,13 +76,6 @@ taming:
     - "VILLAGER"
     - "WANDERING_TRADER"
     - "SHULKER"
-    # --- MyPet 3.14.1 で未実装のモブ ---
-    # 以下のモブタイプは MyPet がサポートしていないため、テイミング不可です。
-    # MyPet のアップデートで対応された場合はここから削除してください。
-    - "GIANT"
-    # --- バニラ Minecraft に存在しないモブ ---
-    # CopperGolem は Mob Vote のコンセプトモブで、バニラには存在しません。
-    - "COPPER_GOLEM"
 
   # --- ペットスケール(サイズ)オーバーライド ---
   # テイム後のペットの大きさを変更する設定
@@ -92,6 +85,7 @@ taming:
     WITHER: 0.7
     ELDER_GUARDIAN: 0.7
     GHAST: 0.5
+    GIANT: 0.3
 
   # --- MythicMobs 除外設定 ---
   mythicmobs-exclusion:

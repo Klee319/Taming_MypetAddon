@@ -117,6 +117,7 @@ pet-base-values:
       - "SNOW_GOLEM"
       - "SKELETON_HORSE"
       - "ZOMBIE_HORSE"
+      - "COPPER_GOLEM"
     stats:
       Life:
         min: 50.0
@@ -232,6 +233,20 @@ pet-base-values:
   # 特定のモブは強さが極端、または特殊な扱いが必要なため個別定義
 
   special:
+    giant:
+      types:
+        - "GIANT"
+      stats:
+        Life:
+          min: 180.0
+          max: 250.0
+        Damage:
+          min: 18.0
+          max: 35.0
+        Speed:
+          min: 0.25
+          max: 0.35
+
     wither:
       types:
         - "WITHER"
